@@ -450,6 +450,79 @@
     .art-page-cover { height: 160px; }
   }
 </style>
+<!-- ── FIREBASE ─────────────────────────────── -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDNNPnnxarNhPJQNDJMN3BUa1ClqogCvMg",
+    authDomain: "smf-room-04-smfonda.firebaseapp.com",
+    projectId: "smf-room-04-smfonda",
+    storageBucket: "smf-room-04-smfonda.firebasestorage.app",
+    messagingSenderId: "796750604065",
+    appId: "1:796750604065:web:9b67eb0d8e3b698ac3c060",
+    measurementId: "G-8Y0CXL6E8Q"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ── Exposer les fonctions Firebase au scope global ──
+  window._db = db;
+  window._col = collection;
+  window._getDocs = getDocs;
+  window._addDoc = addDoc;
+  window._updateDoc = updateDoc;
+  window._deleteDoc = deleteDoc;
+  window._doc = doc;
+  window._onSnapshot = onSnapshot;
+  window._setDoc = setDoc;
+
+  // ── Charger les articles depuis Firestore au démarrage ──
+  window.loadFromFirebase = async function() {
+    try {
+      const snap = await getDocs(collection(db, "articles"));
+      const arts = [];
+      snap.forEach(d => arts.push({ id: d.id, ...d.data() }));
+      // Trier par date de création décroissante
+      arts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      window.articles = arts;
+      if (typeof renderAll === 'function') renderAll();
+      if (typeof updateStats === 'function') updateStats();
+    } catch(e) {
+      console.error('Firebase load error:', e);
+    }
+  };
+
+  // ── Sauvegarder un article dans Firestore ──
+  window.saveToFirebase = async function(article) {
+    try {
+      if (article.id && article.id.startsWith('art_')) {
+        // Nouvel article : utiliser l'id généré comme doc id
+        await setDoc(doc(db, "articles", article.id), article);
+      } else if (article.id) {
+        await setDoc(doc(db, "articles", article.id), article);
+      }
+    } catch(e) {
+      console.error('Firebase save error:', e);
+    }
+  };
+
+  // ── Supprimer un article de Firestore ──
+  window.deleteFromFirebase = async function(id) {
+    try {
+      await deleteDoc(doc(db, "articles", id));
+    } catch(e) {
+      console.error('Firebase delete error:', e);
+    }
+  };
+
+  // ── Attendre que le DOM soit prêt puis charger ──
+  document.addEventListener('DOMContentLoaded', () => {
+    window.loadFromFirebase();
+  });
+</script>
 </head>
 <body>
 
@@ -877,20 +950,20 @@ let currentFilter = '';
 // ── DEFAULT ARTICLES ─────────────────────────
 const defaultArticles = [];
 
-// ── STORAGE ───────────────────────────────────
+// ── STORAGE (Firebase) ────────────────────────
 function loadArticles() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch(e) {}
-  return [];
+  // Retourne le tableau en mémoire (chargé depuis Firebase au démarrage)
+  return window.articles || [];
 }
 
-function saveArticles(articles) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(articles)); } catch(e) {}
+function saveArticles(list) {
+  // Sauvegarde locale en mémoire
+  window.articles = list;
+  // La sauvegarde Firebase est gérée dans saveArticle() et confirmDelete()
 }
 
-let articles = loadArticles();
+window.articles = [];
+let articles = window.articles;
 
 // ── RENDER ────────────────────────────────────
 const THUMB_ICONS = {
@@ -1126,6 +1199,7 @@ function closeSearch() {
 }
 
 function renderAll() {
+  articles = window.articles;
   renderHero();
   renderArticleList();
   renderBancCentrale();
@@ -1284,7 +1358,7 @@ function addCustomPage() {
   input.value = '';
 }
 
-function saveArticle() {
+async function saveArticle() {
   // Capturer le contenu de la page en cours d'édition
   editingPages[currentPageTag] = document.getElementById('fContent').innerHTML.trim();
 
@@ -1302,31 +1376,48 @@ function saveArticle() {
   const content = editingPages[''] || '';
   const coverImage = currentCoverImage || '';
 
-  // Pages secondaires (toutes sauf la page principale ''), uniquement si non vides
   const pages = {};
   Object.keys(editingPages).forEach(key => {
     if (key === '') return;
     if (editingPages[key]) pages[key] = editingPages[key];
   });
 
+  let articleObj;
   if (editingId) {
     const idx = articles.findIndex(a => a.id === editingId);
     if (idx !== -1) {
-      articles[idx] = { ...articles[idx], title, excerpt, author, content, coverImage, pages,
+      articleObj = { ...articles[idx], title, excerpt, author, content, coverImage, pages,
         category: document.getElementById('fCategory').value,
         featured, date: articles[idx].date };
+      articles[idx] = articleObj;
     }
-    showToast('Article mis à jour avec succès !', 'success');
+    showToast('Mise à jour en cours…', 'success');
   } else {
-    articles.unshift({ id: 'art_' + Date.now(), title, excerpt, author, content, coverImage, pages,
+    articleObj = { id: 'art_' + Date.now(), title, excerpt, author, content, coverImage, pages,
       category: document.getElementById('fCategory').value,
-      featured, date: dateStr });
-    showToast('Article publié avec succès !', 'success');
+      featured, date: dateStr, createdAt: Date.now() };
+    articles.unshift(articleObj);
+    showToast('Publication en cours…', 'success');
   }
 
-  saveArticles(articles);
+  // Sauvegarder dans Firebase
+  if (window.saveToFirebase) {
+    await window.saveToFirebase(articleObj);
+    // Si featured, mettre à jour les autres articles dans Firebase
+    if (featured) {
+      for (const a of articles) {
+        if (a.id !== articleObj.id && a.featured) {
+          a.featured = false;
+          await window.saveToFirebase(a);
+        }
+      }
+    }
+  }
+
+  window.articles = articles;
   closeArticleModal();
-  renderAll();
+  await window.loadFromFirebase();
+  showToast(editingId ? 'Article mis à jour !' : 'Article publié !', 'success');
 }
 
 // ── DELETE ────────────────────────────────────
@@ -1343,13 +1434,16 @@ function closeDeleteModal() {
   deletingId = null;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!deletingId) return;
+  // Supprimer de Firebase
+  if (window.deleteFromFirebase) {
+    await window.deleteFromFirebase(deletingId);
+  }
   articles = articles.filter(a => a.id !== deletingId);
-  if (articles.length > 0 && !articles.find(a => a.featured)) articles[0].featured = true;
-  saveArticles(articles);
+  window.articles = articles;
   closeDeleteModal();
-  renderAll();
+  await window.loadFromFirebase();
   showToast('Article supprimé.', 'success');
 }
 
