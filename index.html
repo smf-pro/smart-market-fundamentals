@@ -383,7 +383,11 @@
   .nl-full-form .nl-btn:hover { background: #1265c0; }
   .nl-full-form .nl-note { color: #4A607A; font-size: 11px; text-align: center; }
 
-  /* Sidebar Central Banks */
+  /* Newsletter dans le pied de page */
+  .footer-newsletter { max-width: 1200px; margin: 0 auto; padding: 36px 24px 0; }
+  .footer-newsletter-inner { display: flex; align-items: center; gap: 48px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 36px; }
+  .footer-newsletter .nl-full-form { display: flex; flex-direction: column; gap: 8px; min-width: 300px; flex-shrink: 0; }
+
   .bc-article-row { display: flex; align-items: flex-start; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; cursor: pointer; transition: background 0.1s; }
   .bc-article-row:last-child { border-bottom: none; }
   .bc-article-row:hover { background: var(--bg); }
@@ -450,6 +454,10 @@
     .nl-full-inner { flex-direction: column; gap: 24px; }
     .nl-full-form { min-width: unset; width: 100%; }
     .newsletter-full { padding: 24px 20px; }
+
+    .footer-newsletter-inner { flex-direction: column; gap: 24px; align-items: stretch; }
+    .footer-newsletter .nl-full-form { min-width: unset; width: 100%; }
+    .footer-newsletter { padding: 24px 20px 0; }
 
     .admin-stats { display: none; }
     .admin-bar-inner { flex-wrap: wrap; gap: 10px; }
@@ -556,9 +564,34 @@
     }
   };
 
+  // ── Charger les paramètres du pied de page depuis Firestore ──
+  window.loadFooterSettings = async function() {
+    try {
+      const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+      const snap = await getDoc(doc(db, "settings", "footer"));
+      if (snap.exists()) {
+        window.footerSettings = snap.data();
+      }
+    } catch(e) {
+      console.error('Firebase footer load error:', e);
+    } finally {
+      if (typeof applyFooterSettings === 'function') applyFooterSettings();
+    }
+  };
+
+  // ── Sauvegarder les paramètres du pied de page dans Firestore ──
+  window._fbSaveFooterSettings = async function(settings) {
+    try {
+      await setDoc(doc(db, "settings", "footer"), settings);
+    } catch(e) {
+      console.error('Firebase footer save error:', e);
+    }
+  };
+
   // ── Attendre que le DOM soit prêt puis charger ──
   document.addEventListener('DOMContentLoaded', () => {
     window.loadFromFirebase();
+    window.loadFooterSettings();
   });
 </script>
 </head>
@@ -875,13 +908,17 @@
       <!-- Dynamically filled -->
     </div>
   </div>
+</main>
+</div><!-- /homePage -->
 
-  <!-- Newsletter pleine largeur -->
-  <div class="newsletter-full">
-    <div class="nl-full-inner">
+<!-- ── FOOTER ─────────────────────────────────── -->
+<footer>
+  <!-- Briefing quotidien -->
+  <div class="footer-newsletter">
+    <div class="footer-newsletter-inner">
       <div class="nl-full-text">
         <h3>Briefing quotidien</h3>
-        <p>Chaque matin à 7h30, les 5 points essentiels des marchés et un rapport à ne pas manquer — directement dans votre boîte mail.</p>
+        <p>Chaque matin à 7h30, les points essentiels des marchés — Forex, banques centrales et actualité macro — directement dans votre boîte mail.</p>
       </div>
       <div class="nl-full-form">
         <input class="nl-input" type="email" placeholder="votre@email.com" />
@@ -890,27 +927,24 @@
       </div>
     </div>
   </div>
-</main>
-</div><!-- /homePage -->
 
-<!-- ── FOOTER ─────────────────────────────────── -->
-<footer>
   <div class="footer-inner">
     <div class="footer-brand">
       <span style="font-family:'DM Serif Display',serif;font-size:22px;color:#C4D0DE;">SMF<span style="color:#5B9BD5;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;margin-left:8px;letter-spacing:0.02em;">Smart Market Fundamentals</span></span>
-      <p>La référence indépendante pour la recherche et l'analyse financière en langue française. Rapports sectoriels, analyses macro et études de marché par des professionnels certifiés.</p>
+      <p id="footerDescription">La référence indépendante pour le suivi des marchés des changes et des banques centrales. Analyses Forex, décisions de politique monétaire et actualité macroéconomique, décryptées pour les traders et investisseurs.</p>
+      <button class="btn btn-ghost" id="footerEditBtn" style="display:none;margin-top:14px;font-size:12px;padding:6px 12px" onclick="openFooterEditModal()">✎ Modifier le pied de page</button>
     </div>
     <div class="footer-col">
       <h4>Rubriques</h4>
-      <a href="#">Marchés actions</a><a href="#">Obligataire</a><a href="#">Matières premières</a><a href="#">Crypto &amp; actifs numériques</a><a href="#">ESG &amp; finance durable</a>
+      <a href="#forex" onclick="filterCat(this,'Forex',event)">Forex</a><a href="#central-banks" onclick="filterCat(this,'Central Banks',event)">Banques centrales</a><a href="#" onclick="filterCat(this,'',event)">Politique monétaire</a><a href="#" onclick="filterCat(this,'',event)">Risque souverain</a><a href="#autre" onclick="filterCat(this,'Autre',event)">Autre</a>
     </div>
     <div class="footer-col">
       <h4>Ressources</h4>
-      <a href="#">Bibliothèque de rapports</a><a href="#">Données &amp; statistiques</a><a href="#">Glossaire financier</a><a href="#">Nos analystes</a><a href="#">API</a>
+      <a href="#" onclick="filterCat(this,'',event)">Bibliothèque de rapports</a><a href="#" onclick="filterCat(this,'',event)">Calendrier économique</a><a href="#" onclick="filterCat(this,'',event)">Glossaire financier</a><a href="#" onclick="filterCat(this,'',event)">Nos analystes</a>
     </div>
     <div class="footer-col">
       <h4>SMF</h4>
-      <a href="#">À propos</a><a href="#">Devenir contributeur</a><a href="#">Abonnements</a><a href="#">Contact</a><a href="#">Mentions légales</a>
+      <a href="#">À propos</a><a href="#">Devenir contributeur</a><a href="#">Abonnements</a><a id="footerContactLink" href="https://wa.me/" target="_blank" rel="noopener">Contact</a><a href="#">Mentions légales</a>
     </div>
   </div>
   <div class="footer-bottom">
@@ -918,6 +952,30 @@
     <span>Les informations publiées ne constituent pas des conseils en investissement.</span>
   </div>
 </footer>
+
+<!-- ── MODAL ÉDITION PIED DE PAGE ─────────────── -->
+<div class="modal-overlay" id="footerEditModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <h2>Modifier le pied de page</h2>
+      <button class="modal-close" onclick="closeFooterEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Description (sous le logo SMF)</label>
+        <textarea class="form-input" id="footerDescInput" rows="4"></textarea>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Numéro WhatsApp (avec indicatif, sans espaces, ex: 22890000000)</label>
+        <input class="form-input" type="text" id="footerWhatsappInput" placeholder="22890000000" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeFooterEditModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveFooterSettings()">Enregistrer</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── CONFIG ────────────────────────────────────
@@ -1216,6 +1274,7 @@ function doLogin() {
     closeLoginModal();
     document.getElementById('adminBar').style.display = 'block';
     document.getElementById('navActions').innerHTML = `<span class="admin-badge">● Admin</span><button class="btn btn-primary" style="background:#1A7A4A" onclick="openNewArticleModal()">+ Publier</button><button class="btn btn-ghost" onclick="doLogout()">Déconnexion</button>`;
+    document.getElementById('footerEditBtn').style.display = 'inline-block';
     renderAll();
     syncMobileAdminMenu();
     showToast('Bienvenue ! Vous êtes connecté en tant qu\'admin.', 'success');
@@ -1230,9 +1289,49 @@ function doLogout() {
   isAdmin = false;
   document.getElementById('adminBar').style.display = 'none';
   document.getElementById('navActions').innerHTML = `<button class="btn btn-ghost" onclick="openLoginModal()">Se connecter</button><button class="btn btn-primary">S'abonner</button>`;
+  document.getElementById('footerEditBtn').style.display = 'none';
   renderAll();
   syncMobileAdminMenu();
   showToast('Vous avez été déconnecté.', 'success');
+}
+
+// ── PIED DE PAGE (paramètres) ─────────────────
+const DEFAULT_FOOTER_DESC = "La référence indépendante pour la recherche et l'analyse financière en langue française. Rapports sectoriels, analyses macro et études de marché par des professionnels certifiés.";
+
+function applyFooterSettings() {
+  const s = window.footerSettings || {};
+  const descEl = document.getElementById('footerDescription');
+  if (descEl) descEl.textContent = s.description || DEFAULT_FOOTER_DESC;
+
+  const contactEl = document.getElementById('footerContactLink');
+  if (contactEl) {
+    const wa = (s.whatsapp || '').replace(/[^0-9]/g, '');
+    contactEl.href = wa ? `https://wa.me/${wa}` : '#';
+  }
+}
+
+function openFooterEditModal() {
+  const s = window.footerSettings || {};
+  document.getElementById('footerDescInput').value = s.description || DEFAULT_FOOTER_DESC;
+  document.getElementById('footerWhatsappInput').value = s.whatsapp || '';
+  document.getElementById('footerEditModal').classList.add('open');
+}
+
+function closeFooterEditModal() {
+  document.getElementById('footerEditModal').classList.remove('open');
+}
+
+async function saveFooterSettings() {
+  const description = document.getElementById('footerDescInput').value.trim();
+  const whatsapp = document.getElementById('footerWhatsappInput').value.trim().replace(/[^0-9]/g, '');
+  const settings = { description, whatsapp };
+  window.footerSettings = settings;
+  applyFooterSettings();
+  closeFooterEditModal();
+  if (typeof window._fbSaveFooterSettings === 'function') {
+    await window._fbSaveFooterSettings(settings);
+  }
+  showToast('Pied de page mis à jour.', 'success');
 }
 
 // ── ARTICLE MODAL ─────────────────────────────
