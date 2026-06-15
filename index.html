@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SMF — Smart Market Fundamentals</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000000'/%3E%3Ctext x='32' y='46' font-family='Georgia, serif' font-size='40' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -717,6 +718,10 @@
             <input class="form-input" id="fAuthor" placeholder="Ex: Sophie Carré" />
           </div>
           <div class="form-row">
+            <label class="form-label">Date de publication</label>
+            <input class="form-input" type="date" id="fDate" />
+          </div>
+          <div class="form-row">
             <label class="form-label">Catégorie principale</label>
             <select class="form-select" id="fCategory">
               <option value="blue|Actions">Actions</option>
@@ -1351,6 +1356,7 @@ function openNewArticleModal() {
   document.getElementById('fTitle').value = '';
   document.getElementById('fExcerpt').value = '';
   document.getElementById('fAuthor').value = '';
+  document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('fCategory').value = 'blue|Actions';
   resetTag2Options();
   document.getElementById('fTag2').value = '';
@@ -1377,6 +1383,7 @@ function openEditModal(id, e) {
   document.getElementById('fTitle').value = a.title;
   document.getElementById('fExcerpt').value = a.excerpt;
   document.getElementById('fAuthor').value = a.author;
+  document.getElementById('fDate').value = frDateToISO(a.date) || new Date().toISOString().slice(0, 10);
   document.getElementById('fCategory').value = a.category || 'blue|Actions';
   resetTag2Options();
   addPageOptionsFromPages(a.pages);
@@ -1433,6 +1440,26 @@ function addCustomPage() {
   input.value = '';
 }
 
+// ── DATE : conversion entre format ISO (input date) et français affiché ─
+const FR_MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function isoToFrDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return '';
+  return `${d} ${FR_MONTHS[m - 1]} ${y}`;
+}
+
+function frDateToISO(fr) {
+  if (!fr) return '';
+  const parts = fr.trim().split(' ');
+  if (parts.length !== 3) return '';
+  const [d, monthName, y] = parts;
+  const m = FR_MONTHS.indexOf(monthName.toLowerCase()) + 1;
+  if (!m) return '';
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
 async function saveArticle() {
   // Capturer le contenu de la page en cours d'édition
   editingPages[currentPageTag] = document.getElementById('fContent').innerHTML.trim();
@@ -1445,8 +1472,8 @@ async function saveArticle() {
   const featured = document.getElementById('fFeatured').checked;
   if (featured) articles.forEach(a => a.featured = false);
 
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const fDateVal = document.getElementById('fDate').value;
+  const dateStr = isoToFrDate(fDateVal) || new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const content = editingPages[''] || '';
   const coverImage = currentCoverImage || '';
@@ -1463,7 +1490,7 @@ async function saveArticle() {
     if (idx !== -1) {
       articleObj = { ...articles[idx], title, excerpt, author, content, coverImage, pages,
         category: document.getElementById('fCategory').value,
-        featured, date: articles[idx].date };
+        featured, date: dateStr };
       articles[idx] = articleObj;
     }
     showToast('Mise à jour en cours…', 'success');
