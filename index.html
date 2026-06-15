@@ -638,23 +638,15 @@
           <option value="Arial, sans-serif" style="font-family:Arial,sans-serif">Arial</option>
           <option value="'JetBrains Mono', monospace" style="font-family:'JetBrains Mono',monospace">Monospace</option>
         </select>
-        <select class="editor-select editor-select-dark" title="Taille du texte" onchange="setFontSizePt(this.value); this.selectedIndex=0">
+        <select class="editor-select editor-select-dark" title="Taille du texte" onchange="insertFormat('fontSize', this.value); this.selectedIndex=0">
           <option value="">Taille</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-          <option value="14">14</option>
-          <option value="16">16</option>
-          <option value="18">18</option>
-          <option value="20">20</option>
-          <option value="24">24</option>
-          <option value="28">28</option>
-          <option value="32">32</option>
-          <option value="36">36</option>
-          <option value="48">48</option>
-          <option value="72">72</option>
+          <option value="1">Très petit</option>
+          <option value="2">Petit</option>
+          <option value="3">Normal</option>
+          <option value="4">Moyen</option>
+          <option value="5">Grand</option>
+          <option value="6">Très grand</option>
+          <option value="7">Énorme</option>
         </select>
         <div class="editor-sep editor-sep-dark"></div>
         <button type="button" class="editor-btn editor-btn-dark" title="Titre" onclick="insertFormat('formatBlock','H2')">H2</button>
@@ -732,13 +724,8 @@
           <div class="form-row">
             <label class="form-label">Catégorie principale</label>
             <select class="form-select" id="fCategory">
-              <option value="blue|Actions">Actions</option>
               <option value="green|Forex">Forex</option>
               <option value="navy|Central Banks">Central Banks</option>
-              <option value="red|Risque souverain">Risque souverain</option>
-              <option value="green|ESG">ESG</option>
-              <option value="amber|Fusions-acquisitions">Fusions-acquisitions</option>
-              <option value="blue|Politique monétaire">Politique monétaire</option>
               <option value="amber|Autre">Autre</option>
             </select>
           </div>
@@ -1373,7 +1360,7 @@ function openNewArticleModal() {
   document.getElementById('fExcerpt').value = '';
   document.getElementById('fAuthor').value = '';
   document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('fCategory').value = 'blue|Actions';
+  document.getElementById('fCategory').value = 'green|Forex';
   resetTag2Options();
   document.getElementById('fTag2').value = '';
   document.getElementById('fNewPageName').value = '';
@@ -1400,7 +1387,7 @@ function openEditModal(id, e) {
   document.getElementById('fExcerpt').value = a.excerpt;
   document.getElementById('fAuthor').value = a.author;
   document.getElementById('fDate').value = frDateToISO(a.date) || new Date().toISOString().slice(0, 10);
-  document.getElementById('fCategory').value = a.category || 'blue|Actions';
+  document.getElementById('fCategory').value = a.category || 'green|Forex';
   resetTag2Options();
   addPageOptionsFromPages(a.pages);
   document.getElementById('fTag2').value = '';
@@ -1789,26 +1776,6 @@ function insertFormat(command, value) {
   restoreEditorSelection();
   try {
     document.execCommand(command, false, value || null);
-  } catch (e) {}
-  saveEditorSelection();
-  updateCharCount();
-}
-
-// Applique une taille de police en points (pt), comme dans Word.
-// Astuce : execCommand('fontSize') ne supporte que 1-7, on utilise donc
-// la valeur 7 comme marqueur temporaire puis on la remplace par du CSS en pt.
-function setFontSizePt(pt) {
-  if (!pt) return;
-  restoreEditorSelection();
-  try {
-    document.execCommand('fontSize', false, '7');
-    const editor = document.getElementById('fContent');
-    if (editor) {
-      editor.querySelectorAll('font[size="7"]').forEach(el => {
-        el.removeAttribute('size');
-        el.style.fontSize = pt + 'pt';
-      });
-    }
   } catch (e) {}
   saveEditorSelection();
   updateCharCount();
