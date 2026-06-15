@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMF — Smart Market Fundamentals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  :root {
+    --bg: #F7F6F2; --surface: #FFFFFF; --navy: #0D2240; --blue: #1657A8;
+    --blue-lt: #EBF1FB; --border: #E2E0D8; --border-md: #C8C5BC;
+    --txt: #111111; --txt-muted: #6A6860; --txt-faint: #9C9A94;
+    --green: #1A7A4A; --green-bg: #E8F5EE; --red: #C0392B; --red-bg: #FDEEEC;
+    --amber: #8A5C0A; --amber-bg: #FEF3DC; --radius: 6px; --radius-lg: 10px;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--txt); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+
+  /* Topbar citations défilantes */
+  .topbar { background: var(--navy); color: #A8B8CC; font-size: 12px; font-family: var(--sans); padding: 0; overflow: hidden; white-space: nowrap; position: relative; height: 32px; display: flex; align-items: center; }
+  .topbar-track { display: inline-flex; align-items: center; gap: 0; animation: ticker-scroll 120s linear infinite; will-change: transform; }
+  .topbar-track:hover { animation-play-state: paused; }
+  .topbar-quote { display: inline-flex; align-items: center; gap: 10px; padding: 0 48px; color: #A8B8CC; letter-spacing: 0.01em; flex-shrink: 0; }
+  .topbar-quote em { font-style: italic; color: #C8DAEF; }
+  .topbar-quote .quote-author { color: #5B7A9A; font-size: 11px; font-weight: 500; }
+  .topbar-sep { color: #2A4A6A; font-size: 16px; }
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Barre de recherche nav */
+  .nav-search-wrap { display: flex; align-items: center; margin: 0 8px; }
+  .nav-search-box { display: flex; align-items: center; gap: 7px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; transition: border-color 0.15s, box-shadow 0.15s, width 0.2s; width: 120px; }
+  .nav-search-box:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-lt); width: 240px; }
+  .nav-search-box svg { color: var(--txt-faint); flex-shrink: 0; transition: color 0.15s; }
+  .nav-search-box:focus-within svg { color: var(--blue); }
+  .nav-search-box input { border: none; background: transparent; font-family: var(--sans); font-size: 13px; color: var(--txt); outline: none; width: 100%; }
+  .nav-search-box input::placeholder { color: var(--txt-faint); }
+  .nav-search-clear { background: none; border: none; color: var(--txt-faint); cursor: pointer; font-size: 12px; padding: 0; line-height: 1; flex-shrink: 0; }
+  .nav-search-clear:hover { color: var(--txt); }
+  .search-highlight { background: #FEF3DC; border-radius: 2px; }
+
+  /* Navbar */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; padding: 0 24px; height: 56px; gap: 32px; }
+  .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .logo-icon { width: 32px; height: 32px; background: var(--navy); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2; }
+  .logo-name { font-family: var(--serif); font-size: 20px; color: var(--navy); letter-spacing: -0.5px; }
+  .logo-name em { color: var(--blue); font-style: normal; }
+  .nav-links { display: flex; gap: 2px; flex: 1; }
+  .nav-links a { font-size: 13px; font-weight: 500; color: var(--txt-muted); padding: 6px 12px; border-radius: var(--radius); transition: background 0.12s, color 0.12s; }
+  .nav-links a:hover { background: var(--bg); color: var(--txt); }
+  .nav-links a.active { color: var(--blue); }
+  .nav-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .btn { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: var(--radius); cursor: pointer; transition: background 0.12s, color 0.12s; border: 1px solid transparent; }
+  .btn-ghost { background: transparent; color: var(--txt-muted); border-color: var(--border); }
+  .btn-ghost:hover { background: var(--bg); color: var(--txt); }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: #163560; }
+  .btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
+  .btn-danger:hover { background: #a02f20; }
+  .admin-badge { font-size: 11px; font-weight: 600; background: var(--amber-bg); color: var(--amber); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--amber); }
+
+  /* Page layout */
+  .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  /* Tags */
+  .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.03em; padding: 3px 9px; border-radius: 20px; }
+  .tag-blue { background: var(--blue-lt); color: var(--blue); }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+  .tag-amber { background: var(--amber-bg); color: var(--amber); }
+  .tag-red { background: var(--red-bg); color: var(--red); }
+  .tag-navy { background: #EAF0F8; color: var(--navy); }
+
+  /* Hero */
+  .hero-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-bottom: 40px; }
+  .hero-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+  .hero-visual { height: 200px; background: var(--navy); position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 20px; }
+  .hero-chart { display: flex; align-items: flex-end; gap: 5px; height: 120px; width: 100%; position: absolute; bottom: 0; left: 0; padding: 0 20px 20px; }
+  .hbar { flex: 1; background: rgba(255,255,255,0.12); border-radius: 2px 2px 0 0; transition: background 0.2s; }
+  .hbar:hover { background: rgba(255,255,255,0.25); }
+  .hbar.hi { background: rgba(86,180,145,0.7); }
+  .hero-badge { position: absolute; top: 16px; left: 16px; background: rgba(255,255,255,0.12); color: #C8DAEF; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; backdrop-filter: blur(4px); }
+  .hero-period { position: absolute; bottom: 16px; right: 16px; font-family: var(--mono); font-size: 11px; color: rgba(200,218,239,0.7); }
+  .hero-body { padding: 22px 24px 20px; flex: 1; display: flex; flex-direction: column; }
+  .hero-tags { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .hero-body h2 { font-family: var(--serif); font-size: 22px; color: var(--navy); line-height: 1.3; margin-bottom: 10px; letter-spacing: -0.3px; }
+  .hero-excerpt { font-size: 14px; color: var(--txt-muted); line-height: 1.7; margin-bottom: 16px; flex: 1; }
+  .article-footer { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--txt-faint); padding-top: 14px; border-top: 1px solid var(--border); }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--blue-lt); color: var(--blue); font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .footer-author { font-weight: 500; color: var(--txt-muted); }
+  .footer-sep { color: var(--border-md); }
+  .footer-dl { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--blue); cursor: pointer; }
+  .footer-dl svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  /* Hero side */
+  .hero-side { display: flex; flex-direction: column; gap: 12px; }
+  .side-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer; transition: border-color 0.12s; flex: 1; }
+  .side-card:hover { border-color: var(--blue); }
+  .side-icon { width: 40px; height: 40px; border-radius: var(--radius); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .si-blue { background: var(--blue-lt); } .si-green { background: var(--green-bg); } .si-amber { background: var(--amber-bg); }
+  .side-icon svg { width: 18px; height: 18px; stroke-width: 1.8; fill: none; }
+  .si-blue svg { stroke: var(--blue); } .si-green svg { stroke: var(--green); } .si-amber svg { stroke: var(--amber); }
+  .side-body { flex: 1; min-width: 0; }
+  .side-tags { display: flex; gap: 5px; margin-bottom: 5px; }
+  .side-title { font-size: 13px; font-weight: 500; color: var(--navy); line-height: 1.4; margin-bottom: 6px; }
+  .side-footer { font-size: 11px; color: var(--txt-faint); display: flex; gap: 8px; }
+
+  /* Body grid */
+  .body-grid { display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+
+  /* Section header */
+  .section-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-hd h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--txt-faint); }
+  .section-hd a { font-size: 12px; font-weight: 500; color: var(--blue); }
+
+  /* Article list */
+  .article-list { display: flex; flex-direction: column; gap: 1px; }
+  .art-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; display: flex; gap: 16px; cursor: pointer; transition: border-color 0.12s; margin-bottom: 8px; position: relative; }
+  .art-row:hover { border-color: var(--blue); }
+  .art-thumb { width: 80px; min-width: 80px; height: 80px; border-radius: var(--radius); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .at-blue { background: var(--blue-lt); } .at-green { background: var(--green-bg); } .at-amber { background: var(--amber-bg); } .at-red { background: var(--red-bg); }
+  .art-thumb svg { width: 32px; height: 32px; fill: none; stroke-width: 1.5; }
+  .at-blue svg { stroke: var(--blue); } .at-green svg { stroke: var(--green); } .at-amber svg { stroke: var(--amber); } .at-red svg { stroke: var(--red); }
+  .art-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .art-tags { display: flex; gap: 5px; margin-bottom: 7px; flex-wrap: wrap; }
+  .art-title { font-size: 15px; font-weight: 500; color: var(--navy); line-height: 1.4; margin-bottom: 6px; }
+  .art-excerpt-sm { font-size: 13px; color: var(--txt-muted); line-height: 1.6; margin-bottom: 10px; }
+  .art-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--txt-faint); margin-top: auto; flex-wrap: wrap; }
+  .art-pages { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--txt-faint); background: var(--bg); padding: 2px 8px; border-radius: 4px; }
+
+  /* Admin article actions */
+  .art-admin-actions { display: flex; gap: 6px; position: absolute; top: 12px; right: 12px; opacity: 0; transition: opacity 0.15s; }
+  .art-row:hover .art-admin-actions { opacity: 1; }
+  .art-action-btn { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 4px; cursor: pointer; border: 1px solid; transition: all 0.12s; }
+  .art-edit-btn { background: var(--blue-lt); color: var(--blue); border-color: var(--blue); }
+  .art-edit-btn:hover { background: var(--blue); color: #fff; }
+  .art-del-btn { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+  .art-del-btn:hover { background: var(--red); color: #fff; }
+  .art-featured-btn { background: var(--amber-bg); color: var(--amber); border-color: var(--amber); }
+  .art-featured-btn:hover { background: var(--amber); color: #fff; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .sb-head { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--txt-faint); display: flex; align-items: center; justify-content: space-between; }
+  .sb-head a { font-size: 11px; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--blue); }
+  .mkt-row { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); gap: 8px; }
+  .mkt-row:last-child { border-bottom: none; }
+  .mkt-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .mkt-val { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+  .mkt-chg { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 4px; min-width: 60px; text-align: right; }
+  .chg-up { background: var(--green-bg); color: var(--green); }
+  .chg-down { background: var(--red-bg); color: var(--red); }
+  .picks-list { padding: 8px 0; }
+  .pick-row { display: flex; align-items: center; padding: 9px 16px; gap: 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+  .pick-row:last-child { border-bottom: none; }
+  .pick-row:hover { background: var(--bg); }
+  .pick-num { font-family: var(--mono); font-size: 11px; color: var(--txt-faint); min-width: 14px; }
+  .pick-title { font-size: 13px; font-weight: 500; color: var(--navy); line-height: 1.35; flex: 1; }
+  .pick-tag { flex-shrink: 0; }
+  .newsletter { padding: 18px 16px; }
+  .newsletter p { font-size: 13px; color: var(--txt-muted); line-height: 1.65; margin-bottom: 14px; }
+  .nl-input { width: 100%; font-family: var(--sans); font-size: 13px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--txt); margin-bottom: 8px; outline: none; transition: border-color 0.15s; }
+  .nl-input:focus { border-color: var(--blue); }
+  .nl-btn { width: 100%; font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 9px; border: none; border-radius: var(--radius); background: var(--navy); color: #fff; cursor: pointer; transition: background 0.12s; }
+  .nl-btn:hover { background: #163560; }
+  .nl-note { font-size: 11px; color: var(--txt-faint); margin-top: 8px; text-align: center; }
+
+  /* Footer */
+  footer { background: var(--navy); color: #8A9DB5; margin-top: 64px; font-size: 13px; }
+  .footer-inner { max-width: 1200px; margin: 0 auto; padding: 40px 24px 28px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+  .footer-brand p { font-size: 13px; color: #6A7F96; line-height: 1.7; margin-top: 10px; }
+  .footer-col h4 { font-size: 12px; font-weight: 600; color: #C4D0DE; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .footer-col a { display: block; color: #6A7F96; font-size: 13px; margin-bottom: 8px; transition: color 0.12s; }
+  .footer-col a:hover { color: #C4D0DE; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; font-size: 12px; color: #4A607A; }
+  .new-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; background: #EBF1FB; color: var(--blue); border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  /* ── MODAL OVERLAY ───────────────────────────── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,34,64,0.55); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+  .modal-head { background: var(--navy); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h2 { font-family: var(--serif); font-size: 18px; color: #fff; }
+  .modal-close { background: transparent; border: none; color: #8A9DB5; font-size: 22px; cursor: pointer; line-height: 1; padding: 0; }
+  .modal-close:hover { color: #fff; }
+  .modal-body { padding: 24px; }
+  .form-row { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--txt-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .form-input, .form-textarea, .form-select { width: 100%; font-family: var(--sans); font-size: 14px; color: var(--txt); padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); outline: none; transition: border-color 0.15s; }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--blue); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* Modale plein écran (éditeur d'article) */
+  .modal-large { max-width: 1100px; width: 100%; height: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; }
+  .modal-large .modal-head, .modal-large .modal-footer { flex-shrink: 0; }
+  .modal-large .modal-body { flex: 1; overflow-y: auto; }
+  .modal-large #fContent { min-height: 380px; max-height: none; }
+  .editor-layout { display: grid; grid-template-columns: 1fr 280px; gap: 28px; align-items: start; height: 100%; }
+  .editor-main { display: flex; flex-direction: column; min-height: 0; }
+  .editor-side { display: flex; flex-direction: column; }
+  @media (max-width: 860px) {
+    .editor-layout { grid-template-columns: 1fr; }
+    .editor-side { order: -1; }
+  }
+
+  /* Login modal */
+  .login-icon { width: 48px; height: 48px; background: var(--blue-lt); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .login-icon svg { width: 22px; height: 22px; stroke: var(--blue); fill: none; stroke-width: 2; }
+  .login-title { text-align: center; font-family: var(--serif); font-size: 22px; color: var(--navy); margin-bottom: 4px; }
+  .login-sub { text-align: center; font-size: 13px; color: var(--txt-muted); margin-bottom: 24px; }
+  .login-error { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; margin-bottom: 14px; display: none; }
+
+  /* Admin panel */
+  .admin-bar { background: linear-gradient(135deg, var(--navy), #1a3a6e); border-bottom: 2px solid var(--blue); padding: 12px 0; }
+  .admin-bar-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 16px; }
+  .admin-bar-title { font-family: var(--serif); font-size: 16px; color: #fff; flex: 1; }
+  .admin-bar-title small { font-family: var(--sans); font-size: 12px; color: #8A9DB5; display: block; margin-top: 1px; }
+  .admin-stats { display: flex; gap: 20px; }
+  .admin-stat { text-align: center; }
+  .admin-stat-num { font-family: var(--mono); font-size: 20px; font-weight: 500; color: #5DD99B; }
+  .admin-stat-lbl { font-size: 11px; color: #8A9DB5; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: #fff; font-size: 13px; font-weight: 500; padding: 12px 20px; border-radius: var(--radius-lg); box-shadow: 0 8px 30px rgba(0,0,0,0.25); z-index: 2000; transform: translateY(20px); opacity: 0; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .toast-success { background: var(--green); }
+  .toast-error { background: var(--red); }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--txt-muted); }
+  .empty-state svg { width: 40px; height: 40px; stroke: var(--border-md); fill: none; stroke-width: 1.5; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── ARTICLE PAGE (vue lecture) ─────────────── */
+  #articlePage { display: none; }
+  #homePage { display: block; }
+  .article-page-wrap { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+  .back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--txt-muted); cursor: pointer; margin-bottom: 28px; padding: 7px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); transition: all 0.12s; }
+  .back-btn:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-lt); }
+  .art-page-header { margin-bottom: 32px; }
+  .art-page-tabs { display: flex; gap: 6px; margin-top: -32px; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 0; padding-top: 4px; position: sticky; top: 56px; z-index: 50; background: var(--bg); }
+  .art-page-tab { font-size: 13px; font-weight: 500; padding: 8px 18px; border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; background: var(--bg); color: var(--txt-muted); cursor: pointer; transition: all 0.12s; margin-bottom: -1px; }
+  .art-page-tab:hover { color: var(--blue); background: var(--blue-lt); }
+  .art-page-tab.active { background: var(--surface); color: var(--navy); border-color: var(--border); border-bottom: 2px solid var(--surface); font-weight: 600; }
+  .art-page-tags { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .art-page-title { font-family: var(--serif); font-size: 32px; color: var(--navy); line-height: 1.25; letter-spacing: -0.5px; margin-bottom: 16px; }
+  .art-page-excerpt { font-size: 17px; color: var(--txt-muted); line-height: 1.75; margin-bottom: 24px; border-left: 3px solid var(--blue); padding-left: 16px; }
+  .art-page-meta { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 0; flex-wrap: wrap; }
+  .art-page-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-lt); color: var(--blue); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .art-page-author { font-weight: 600; font-size: 14px; color: var(--navy); }
+  .art-page-info { font-size: 13px; color: var(--txt-faint); }
+  .art-page-stats { margin-left: auto; display: flex; gap: 16px; }
+  .art-page-stat { font-family: var(--mono); font-size: 12px; color: var(--txt-faint); background: var(--bg); padding: 4px 10px; border-radius: 4px; }
+  .art-page-body { font-size: 16px; line-height: 1.85; color: var(--txt); }
+  .art-page-body img { max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 24px auto; }
+  .art-page-body h2 { font-family: var(--serif); font-size: 22px; color: var(--navy); margin: 32px 0 12px; }
+  .art-page-body h3 { font-size: 17px; font-weight: 600; color: var(--navy); margin: 24px 0 8px; }
+  .art-page-body p { margin-bottom: 18px; }
+  .art-page-body ul, .art-page-body ol { padding-left: 24px; margin-bottom: 18px; }
+  .art-page-body li { margin-bottom: 6px; }
+  .art-page-body blockquote { background: var(--blue-lt); border-left: 4px solid var(--blue); padding: 14px 18px; border-radius: 0 var(--radius) var(--radius) 0; margin: 24px 0; color: var(--navy); font-style: italic; }
+  .art-page-body .data-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin: 24px 0; }
+  .art-page-body .data-box strong { font-family: var(--mono); font-size: 24px; color: var(--blue); display: block; margin-bottom: 4px; }
+  .art-page-cta { background: var(--navy); border-radius: var(--radius-lg); padding: 28px 32px; display: flex; align-items: center; gap: 20px; margin-top: 40px; }
+  .art-page-cta-text h4 { font-family: var(--serif); font-size: 18px; color: #fff; margin-bottom: 6px; }
+  .art-page-cta-text p { font-size: 13px; color: #8A9DB5; line-height: 1.6; }
+  .art-page-cta .btn-primary { background: var(--blue); flex-shrink: 0; padding: 10px 20px; font-size: 14px; }
+  .art-page-admin-bar { background: var(--amber-bg); border: 1px solid var(--amber); border-radius: var(--radius-lg); padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; font-size: 13px; color: var(--amber); }
+  .art-page-admin-bar svg { width: 16px; height: 16px; stroke: var(--amber); fill: none; stroke-width: 2; flex-shrink: 0; }
+
+  /* Éditeur de contenu (WYSIWYG) */
+  .editor-toolbar { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); align-items: center; }
+  .editor-toolbar-side { position: sticky; top: 0; z-index: 10; }
+
+  /* Dark toolbar in modal head */
+  .modal-head-article { flex-wrap: wrap; gap: 12px; padding: 14px 24px; }
+  .modal-head-article h2 { flex-shrink: 0; }
+  .editor-toolbar-head { flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 6px; order: 3; flex-basis: 100%; }
+  .editor-select-dark { background: rgba(255,255,255,0.08); color: #C8DAEF; border-color: rgba(255,255,255,0.15); }
+  .editor-select-dark:hover { border-color: #5DD99B; color: #5DD99B; }
+  .editor-select-dark option { color: #111; }
+  .editor-btn-dark { background: rgba(255,255,255,0.08); color: #C8DAEF; border-color: rgba(255,255,255,0.15); }
+  .editor-btn-dark:hover { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(255,255,255,0.3); }
+  .editor-sep-dark { background: rgba(255,255,255,0.18); }
+  .editor-color-btn-dark { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+  .editor-color-btn-dark .editor-color-icon { color: #C8DAEF; }
+
+  /* Custom color picker (style Word) */
+  .color-picker-wrap { position: relative; }
+  .color-picker-trigger { display: flex; align-items: center; justify-content: center; width: 30px; height: 26px; padding: 0; }
+  .color-menu { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: #2A3F5A; border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius); padding: 10px; width: 220px; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+  .color-menu.open { display: block; }
+  .color-menu-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #8A9DB5; margin-bottom: 6px; }
+  .color-menu-label:not(:first-child) { margin-top: 10px; }
+  .color-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+  .color-grid.theme-grid { grid-template-rows: auto auto; }
+  .color-swatch { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; padding: 0; transition: transform 0.08s; }
+  .color-swatch:hover { transform: scale(1.18); border-color: #fff; }
+  .color-menu-more { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #C8DAEF; cursor: pointer; padding: 6px 4px; border-radius: 4px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+  .color-menu-more:hover { color: #fff; }
+  .color-menu-more svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .editor-toolbar .editor-sep { width: 1px; height: 20px; background: var(--border-md); margin: 0 4px; }
+  .editor-btn { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-muted); transition: all 0.1s; font-family: var(--sans); }
+  .editor-btn:hover { background: var(--blue-lt); color: var(--blue); border-color: var(--blue); }
+  .editor-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .editor-select { font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-muted); font-family: var(--sans); max-width: 110px; }
+  .editor-select:hover { border-color: var(--blue); color: var(--blue); }
+  .editor-color-btn { position: relative; display: flex; align-items: center; justify-content: center; width: 30px; height: 26px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); transition: all 0.1s; overflow: hidden; }
+  .editor-color-btn:hover { border-color: var(--blue); }
+  .editor-color-icon { font-size: 13px; font-weight: 700; color: var(--txt); line-height: 1; position: relative; }
+  .editor-color-icon::after { content: ''; position: absolute; left: -3px; right: -3px; bottom: -4px; height: 3px; background: currentColor; border-radius: 1px; }
+  #textColorIcon::after { background: #C0392B; }
+  .editor-hl-icon { background: transparent; padding: 0 2px; border-radius: 2px; }
+  #hlColorIcon::after { background: #FEF3DC; border: 1px solid var(--border-md); }
+  .editor-color-btn input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; }
+  #fContent { border: 1px solid var(--border); border-radius: var(--radius); min-height: 220px; max-height: 420px; overflow-y: auto; font-family: var(--sans); font-size: 14px; line-height: 1.7; padding: 14px 16px; background: var(--surface); outline: none; color: var(--txt); }
+  #fContent:focus { border-color: var(--blue); }
+  #fContent h2 { font-family: var(--serif); font-size: 20px; color: var(--navy); margin: 18px 0 8px; }
+  #fContent h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin: 14px 0 6px; }
+  #fContent p { margin-bottom: 12px; }
+  #fContent ul, #fContent ol { padding-left: 22px; margin-bottom: 12px; }
+  #fContent blockquote { background: var(--blue-lt); border-left: 4px solid var(--blue); padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0; margin: 14px 0; color: var(--navy); font-style: italic; }
+  #fContent img { max-width: 100%; border-radius: var(--radius); display: block; margin: 14px 0; }
+  #fContent img.editor-img-selected { outline: 2px solid var(--blue); }
+  #fContent hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+  #fContent:empty::before { content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none; }
+  .char-count { font-size: 11px; color: var(--txt-faint); text-align: right; margin-top: 4px; }
+
+  /* Image de couverture */
+  .cover-uploader { border: 1px dashed var(--border-md); border-radius: var(--radius-lg); background: var(--bg); padding: 14px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.12s; }
+  .cover-uploader:hover { border-color: var(--blue); }
+  .cover-preview-wrap { position: relative; width: 96px; height: 64px; border-radius: var(--radius); overflow: hidden; flex-shrink: 0; background: var(--blue-lt); display: flex; align-items: center; justify-content: center; }
+  .cover-preview-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover-preview-wrap svg { width: 22px; height: 22px; stroke: var(--blue); fill: none; stroke-width: 1.8; }
+  .cover-info { flex: 1; }
+  .cover-info-title { font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 2px; }
+  .cover-info-sub { font-size: 12px; color: var(--txt-faint); }
+  .cover-remove-btn { font-size: 11px; font-weight: 600; color: var(--red); background: var(--red-bg); border: 1px solid var(--red); padding: 3px 10px; border-radius: 4px; cursor: pointer; flex-shrink: 0; }
+
+  /* Newsletter pleine largeur */
+  .newsletter-full { background: var(--navy); border-radius: var(--radius-lg); padding: 36px 48px; margin-top: 40px; }
+  .nl-full-inner { display: flex; align-items: center; gap: 48px; }
+  .nl-full-text { flex: 1; }
+  .nl-full-text h3 { font-family: var(--serif); font-size: 24px; color: #fff; margin-bottom: 10px; letter-spacing: -0.3px; }
+  .nl-full-text p { font-size: 14px; color: #8A9DB5; line-height: 1.7; }
+  .nl-full-form { display: flex; flex-direction: column; gap: 8px; min-width: 300px; flex-shrink: 0; }
+  .nl-full-form .nl-input { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); color: #fff; }
+  .nl-full-form .nl-input::placeholder { color: #6A7F96; }
+  .nl-full-form .nl-input:focus { border-color: var(--blue); background: rgba(255,255,255,0.1); }
+  .nl-full-form .nl-btn { background: var(--blue); font-size: 14px; padding: 10px; }
+  .nl-full-form .nl-btn:hover { background: #1265c0; }
+  .nl-full-form .nl-note { color: #4A607A; font-size: 11px; text-align: center; }
+
+  /* Sidebar Central Banks */
+  .bc-article-row { display: flex; align-items: flex-start; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 10px; cursor: pointer; transition: background 0.1s; }
+  .bc-article-row:last-child { border-bottom: none; }
+  .bc-article-row:hover { background: var(--bg); }
+  .bc-article-num { font-family: var(--mono); font-size: 11px; color: var(--txt-faint); min-width: 18px; padding-top: 2px; }
+  .bc-article-body { flex: 1; }
+  .bc-article-title { font-size: 13px; font-weight: 500; color: var(--navy); line-height: 1.4; margin-bottom: 4px; }
+  .bc-article-date { font-size: 11px; color: var(--txt-faint); }
+
+  /* Image de couverture sur la page article */
+  .art-page-cover { width: 100%; height: 320px; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 28px; background: var(--navy); }
+  .art-page-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Couvertures dans les cartes / listes */
+  .hero-visual.has-cover { padding: 0; }
+  .hero-visual.has-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .art-thumb.has-cover, .side-icon.has-cover { padding: 0; overflow: hidden; background-size: cover; background-position: center; }
+  .art-thumb img.cover-img, .side-icon img.cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* ── HAMBURGER MENU ─────────────────────────── */
+  .hamburger { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 36px; height: 36px; background: none; border: none; cursor: pointer; padding: 4px; border-radius: var(--radius); flex-shrink: 0; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--navy); border-radius: 2px; transition: all 0.25s; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu { display: none; position: fixed; top: 88px; left: 0; right: 0; bottom: 0; background: var(--surface); z-index: 99; overflow-y: auto; flex-direction: column; padding: 16px 20px 40px; border-top: 1px solid var(--border); }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu-nav { display: flex; flex-direction: column; }
+  .mobile-menu-nav a { font-size: 16px; font-weight: 500; color: var(--txt); padding: 14px 0; border-bottom: 1px solid var(--border); display: block; }
+  .mobile-menu-nav a.active { color: var(--blue); }
+  .mobile-menu-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+  .mobile-menu-actions .btn { width: 100%; text-align: center; padding: 12px; font-size: 14px; }
+  .mobile-search { margin: 16px 0 4px; }
+  .mobile-search .nav-search-box { width: 100% !important; border-radius: var(--radius); }
+
+  /* ── RESPONSIVE 768px ───────────────────────── */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-search-wrap { display: none; }
+    .nav-actions { display: none; }
+    .hamburger { display: flex; }
+    .nav-inner { gap: 12px; }
+    .logo-name em { display: none; }
+
+    .page { padding: 20px 16px 48px; }
+
+    .hero-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+    .hero-side { gap: 10px; }
+    .hero-visual { height: 160px; }
+
+    .body-grid { grid-template-columns: 1fr; gap: 20px; }
+
+    .art-thumb { width: 60px; min-width: 60px; height: 60px; }
+    .art-title { font-size: 14px; }
+    .art-excerpt-sm { display: none; }
+
+    .article-page-wrap { padding: 20px 16px 48px; }
+    .art-page-title { font-size: 24px; }
+    .art-page-cover { height: 200px; }
+    .art-page-meta { flex-wrap: wrap; gap: 8px; }
+
+    .footer-inner { grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .nl-full-inner { flex-direction: column; gap: 24px; }
+    .nl-full-form { min-width: unset; width: 100%; }
+    .newsletter-full { padding: 24px 20px; }
+
+    .admin-stats { display: none; }
+    .admin-bar-inner { flex-wrap: wrap; gap: 10px; }
+
+    .modal { margin: 0 12px; }
+    .modal-large { max-height: calc(100vh - 20px); }
+  }
+
+  @media (max-width: 480px) {
+    .logo-name { font-size: 16px; }
+    .footer-inner { grid-template-columns: 1fr; }
+    .hero-body { padding: 16px; }
+    .hero-body h2 { font-size: 18px; }
+    .art-page-title { font-size: 20px; }
+    .art-page-cover { height: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN MODAL ───────────────────────────── -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-body" style="padding:32px">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="login-title">Espace Admin</div>
+      <div class="login-sub">Connectez-vous pour gérer les publications</div>
+      <div class="login-error" id="loginError">Identifiants incorrects. Veuillez réessayer.</div>
+      <div class="form-row">
+        <label class="form-label">Identifiant</label>
+        <input class="form-input" type="text" id="loginUser" placeholder="admin" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Mot de passe</label>
+        <input class="form-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:10px;font-size:14px" onclick="doLogin()">Se connecter</button>
+      <p style="text-align:center;font-size:12px;color:var(--txt-faint);margin-top:16px"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ── ARTICLE MODAL (Créer / Modifier) ─────── -->
+<div class="modal-overlay" id="articleModal">
+  <div class="modal modal-large">
+    <div class="modal-head modal-head-article">
+      <h2 id="modalTitle">Nouvelle publication</h2>
+      <div class="editor-toolbar editor-toolbar-head">
+        <select class="editor-select editor-select-dark" title="Police" onchange="insertFormat('fontName', this.value); this.selectedIndex=0">
+          <option value="">Police</option>
+          <option value="Inter" style="font-family:Inter">Inter (défaut)</option>
+          <option value="'DM Serif Display', serif" style="font-family:'DM Serif Display',serif">DM Serif Display</option>
+          <option value="Georgia, serif" style="font-family:Georgia,serif">Georgia</option>
+          <option value="'Times New Roman', serif" style="font-family:'Times New Roman',serif">Times New Roman</option>
+          <option value="Arial, sans-serif" style="font-family:Arial,sans-serif">Arial</option>
+          <option value="'JetBrains Mono', monospace" style="font-family:'JetBrains Mono',monospace">Monospace</option>
+        </select>
+        <select class="editor-select editor-select-dark" title="Taille du texte" onchange="insertFormat('fontSize', this.value); this.selectedIndex=0">
+          <option value="">Taille</option>
+          <option value="1">Très petit</option>
+          <option value="2">Petit</option>
+          <option value="3">Normal</option>
+          <option value="4">Moyen</option>
+          <option value="5">Grand</option>
+          <option value="6">Très grand</option>
+          <option value="7">Énorme</option>
+        </select>
+        <div class="editor-sep editor-sep-dark"></div>
+        <button type="button" class="editor-btn editor-btn-dark" title="Titre" onclick="insertFormat('formatBlock','H2')">H2</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Sous-titre" onclick="insertFormat('formatBlock','H3')">H3</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Gras" onclick="insertFormat('bold')"><b>G</b></button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Italique" onclick="insertFormat('italic')"><i>I</i></button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Souligné" onclick="insertFormat('underline')"><u>S</u></button>
+        <div class="editor-sep editor-sep-dark"></div>
+        <div class="color-picker-wrap" id="textColorWrap">
+          <button type="button" class="editor-btn editor-btn-dark color-picker-trigger" title="Couleur du texte" onclick="toggleColorMenu('textColorMenu', event)">
+            <span class="editor-color-icon" id="textColorIcon">A</span>
+          </button>
+          <div class="color-menu" id="textColorMenu"></div>
+        </div>
+        <div class="color-picker-wrap" id="hlColorWrap">
+          <button type="button" class="editor-btn editor-btn-dark color-picker-trigger" title="Couleur de surlignage" onclick="toggleColorMenu('hlColorMenu', event)">
+            <span class="editor-color-icon editor-hl-icon" id="hlColorIcon">A</span>
+          </button>
+          <div class="color-menu" id="hlColorMenu"></div>
+        </div>
+        <input type="color" id="fTextColor" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" value="#111111" onchange="applyPickedColor('foreColor', this.value, 'textColorIcon')" />
+        <input type="color" id="fHlColor" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" value="#fef3dc" onchange="applyPickedColor('hiliteColor', this.value, 'hlColorIcon', true)" />
+        <button type="button" class="editor-btn editor-btn-dark" title="Effacer la mise en forme" onclick="insertFormat('removeFormat')">⌫ Format</button>
+        <div class="editor-sep editor-sep-dark"></div>
+        <button type="button" class="editor-btn editor-btn-dark" title="Citation" onclick="insertFormat('formatBlock','BLOCKQUOTE')">❝ Citation</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Liste à puces" onclick="insertFormat('insertUnorderedList')">• Liste</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Paragraphe normal" onclick="insertFormat('formatBlock','P')">¶</button>
+        <div class="editor-sep editor-sep-dark"></div>
+        <button type="button" class="editor-btn editor-btn-dark" title="Insérer une image" onclick="document.getElementById('fInlineImageInput').click()">🖼 Image</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Séparateur" onclick="insertFormat('insertHorizontalRule')">— Séparateur</button>
+      </div>
+      <button class="modal-close" onclick="closeArticleModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="editor-layout">
+        <div class="editor-main">
+          <div class="form-row">
+            <label class="form-label">Titre de l'article *</label>
+            <input class="form-input" id="fTitle" placeholder="Ex: Analyse BCE juin 2026 : impact sur les taux…" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">Résumé / Extrait *</label>
+            <textarea class="form-textarea" id="fExcerpt" rows="3" placeholder="Un court résumé visible sur la page d'accueil…"></textarea>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Image de couverture</label>
+            <div class="cover-uploader" onclick="document.getElementById('fCoverInput').click()">
+              <div class="cover-preview-wrap" id="coverPreviewWrap">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              </div>
+              <div class="cover-info">
+                <div class="cover-info-title" id="coverInfoTitle">Aucune image sélectionnée</div>
+                <div class="cover-info-sub">Cliquez pour choisir une image (JPG, PNG). Affichée dans les listes et en tête d'article.</div>
+              </div>
+              <button type="button" class="cover-remove-btn" id="coverRemoveBtn" style="display:none" onclick="removeCoverImage(event)">Retirer</button>
+            </div>
+            <input type="file" id="fCoverInput" accept="image/*" style="display:none" onchange="handleCoverImageChange(event)" />
+          </div>
+          <div class="form-row" style="flex:1; display:flex; flex-direction:column; margin-bottom:0">
+            <label class="form-label">Contenu de l'article</label>
+            <div class="form-textarea" id="fContent" contenteditable="true" data-placeholder="Rédigez le contenu complet de votre article ici... Sélectionnez du texte puis utilisez les boutons pour mettre en forme, ou insérez des images directement dans le texte."></div>
+            <input type="file" id="fInlineImageInput" accept="image/*" style="display:none" onchange="handleInlineImageChange(event)" />
+            <div class="char-count" id="charCount">0 caractères</div>
+          </div>
+        </div>
+        <div class="editor-side">
+          <div class="form-row">
+            <label class="form-label">Auteur *</label>
+            <input class="form-input" id="fAuthor" placeholder="Ex: Sophie Carré" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">Catégorie principale</label>
+            <select class="form-select" id="fCategory">
+              <option value="blue|Actions">Actions</option>
+              <option value="green|Forex">Forex</option>
+              <option value="navy|Central Banks">Central Banks</option>
+              <option value="red|Risque souverain">Risque souverain</option>
+              <option value="green|ESG">ESG</option>
+              <option value="amber|Fusions-acquisitions">Fusions-acquisitions</option>
+              <option value="blue|Politique monétaire">Politique monétaire</option>
+              <option value="amber|Autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Page / Tag secondaire (optionnel)</label>
+            <select class="form-select" id="fTag2" onchange="switchEditorPage(this.value)">
+              <option value="">— Page principale —</option>
+              <option value="green|Forex">Forex</option>
+              <option value="amber|Commodités">Commodités</option>
+              <option value="navy|Cryptomonnaies">Cryptomonnaies</option>
+              <option value="blue|Trades">Trades</option>
+            </select>
+            <div style="font-size:11px;color:var(--txt-faint);margin-top:6px">Le titre, le sous-titre et l'image restent identiques. Seul le contenu change selon la page (tag) sélectionnée.</div>
+            <div style="display:flex;gap:6px;margin-top:10px">
+              <input class="form-input" id="fNewPageName" placeholder="Nom de la nouvelle page (ex: EUR/USD, BCE...)" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomPage();}" />
+              <button type="button" class="btn btn-ghost" style="padding:7px 14px;white-space:nowrap" onclick="addCustomPage()">+ Ajouter</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--txt-muted)">
+              <input type="checkbox" id="fFeatured" style="width:16px;height:16px;accent-color:var(--blue)">
+              Mettre en avant (article vedette)
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeArticleModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveArticle()">Publier</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRM DELETE MODAL ──────────────────── -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h2>Supprimer l'article ?</h2>
+      <button class="modal-close" onclick="closeDeleteModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--txt-muted);line-height:1.7">Cette action est irréversible. L'article sera définitivement supprimé du blog.</p>
+      <p style="font-size:13px;font-weight:600;color:var(--navy);margin-top:12px" id="deleteTitle"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────── -->
+<div class="toast" id="toast">
+  <div class="toast-icon toast-success" id="toastIcon">✓</div>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- ── TOPBAR CITATIONS ───────────────────────── -->
+<div class="topbar">
+  <div class="topbar-track">
+    <!-- Série 1 -->
+    <span class="topbar-quote"><em>« Le risque vient de ne pas savoir ce que vous faites. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« En investissement, ce qui est confortable est rarement profitable. »</em><span class="quote-author">— Robert Arnott</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le marché boursier est un dispositif qui transfère l'argent des impatients vers les patients. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Price is what you pay. Value is what you get. »</em><span class="quote-author">— Benjamin Graham</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« L'investissement à long terme est simplement l'investissement à court terme qui a réussi. »</em><span class="quote-author">— Nassim Taleb</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Diversifier, c'est protéger l'ignorance. Cela n'a que peu de sens pour ceux qui savent ce qu'ils font. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Les marchés peuvent rester irrationnels plus longtemps que vous ne pouvez rester solvable. »</em><span class="quote-author">— John M. Keynes</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Achetez quand tout le monde vend, vendez quand tout le monde achète. »</em><span class="quote-author">— J. Paul Getty</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le marché n'a jamais tort, ce sont les opinions qui le sont. »</em><span class="quote-author">— Jesse Livermore</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« La Bourse est un mécanisme qui transfère de l'argent de l'impatient au patient. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le secret pour gagner en bourse n'est pas d'avoir raison tout le temps, mais de gagner même si vous vous trompez plus d'une fois sur deux. »</em><span class="quote-author">— William O'Neil</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Achetez quand tout le monde vend, tenez jusqu'à ce que tout le monde achète. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le risque vient du fait de ne pas savoir ce que vous faites. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« La volatilité n'est pas le risque. L'ignorance est le risque. »</em><span class="quote-author">— Peter Lynch</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Celui qui vit par l'épée de ses prévisions mourra par l'épée de ses prévisions. »</em><span class="quote-author">— Ray Dalio</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« La Bourse, c'est l'art d'anticiper l'anticipation des autres. »</em><span class="quote-author">— André Kostolany</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le marché boursier est rempli d'individus qui connaissent le prix de tout, mais la valeur de rien. »</em><span class="quote-author">— Philip Fisher</span></span>
+    <span class="topbar-sep">✦</span>
+    <!-- Série 2 (copie identique pour le défilement continu) -->
+    <span class="topbar-quote"><em>« Le risque vient de ne pas savoir ce que vous faites. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« En investissement, ce qui est confortable est rarement profitable. »</em><span class="quote-author">— Robert Arnott</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le marché boursier est un dispositif qui transfère l'argent des impatients vers les patients. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Price is what you pay. Value is what you get. »</em><span class="quote-author">— Benjamin Graham</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« L'investissement à long terme est simplement l'investissement à court terme qui a réussi. »</em><span class="quote-author">— Nassim Taleb</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Diversifier, c'est protéger l'ignorance. Cela n'a que peu de sens pour ceux qui savent ce qu'ils font. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Les marchés peuvent rester irrationnels plus longtemps que vous ne pouvez rester solvable. »</em><span class="quote-author">— John M. Keynes</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Achetez quand tout le monde vend, vendez quand tout le monde achète. »</em><span class="quote-author">— J. Paul Getty</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le marché n'a jamais tort, ce sont les opinions qui le sont. »</em><span class="quote-author">— Jesse Livermore</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« La Bourse est un mécanisme qui transfère de l'argent de l'impatient au patient. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le secret pour gagner en bourse n'est pas d'avoir raison tout le temps, mais de gagner même si vous vous trompez plus d'une fois sur deux. »</em><span class="quote-author">— William O'Neil</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Achetez quand tout le monde vend, tenez jusqu'à ce que tout le monde achète. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le risque vient du fait de ne pas savoir ce que vous faites. »</em><span class="quote-author">— Warren Buffett</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« La volatilité n'est pas le risque. L'ignorance est le risque. »</em><span class="quote-author">— Peter Lynch</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Celui qui vit par l'épée de ses prévisions mourra par l'épée de ses prévisions. »</em><span class="quote-author">— Ray Dalio</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« La Bourse, c'est l'art d'anticiper l'anticipation des autres. »</em><span class="quote-author">— André Kostolany</span></span>
+    <span class="topbar-sep">✦</span>
+    <span class="topbar-quote"><em>« Le marché boursier est rempli d'individus qui connaissent le prix de tout, mais la valeur de rien. »</em><span class="quote-author">— Philip Fisher</span></span>
+    <span class="topbar-sep">✦</span>
+  </div>
+</div>
+
+<!-- ── NAVBAR ─────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><polyline points="3 17 8 12 12 15 17 8 21 11"/></svg>
+      </div>
+      <span class="logo-name">SMF<em> — Smart Market Fundamentals</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="#" class="active" onclick="filterCat(this,'',event)">ACCUEIL</a>
+      <a href="#" onclick="filterCat(this,'Forex',event)">FOREX</a>
+      <a href="#" onclick="filterCat(this,'Central Banks',event)">CENTRAL BANKS</a>
+      <a href="#" onclick="filterCat(this,'Autre',event)">AUTRE</a>
+    </div>
+    <div class="nav-search-wrap" id="navSearchWrap">
+      <div class="nav-search-box" id="navSearchBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="navSearchInput" placeholder="Rechercher…" oninput="handleSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()" autocomplete="off" />
+        <button class="nav-search-clear" id="navSearchClear" onclick="closeSearch()" style="display:none">✕</button>
+      </div>
+    </div>
+    <div class="nav-actions" id="navActions">
+      <button class="btn btn-ghost" onclick="openLoginModal()">Se connecter</button>
+      <button class="btn btn-primary">S'abonner</button>
+    </div>
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── MENU MOBILE ───────────────────────────── -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-search">
+    <div class="nav-search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Rechercher…" oninput="handleSearch(this.value)" autocomplete="off" />
+    </div>
+  </div>
+  <div class="mobile-menu-nav">
+    <a href="#" class="active" onclick="filterCat(this,'',event);closeMobileMenu()">ACCUEIL</a>
+    <a href="#" onclick="filterCat(this,'Forex',event);closeMobileMenu()">FOREX</a>
+    <a href="#" onclick="filterCat(this,'Central Banks',event);closeMobileMenu()">CENTRAL BANKS</a>
+    <a href="#" onclick="filterCat(this,'Autre',event);closeMobileMenu()">AUTRE</a>
+  </div>
+  <div class="mobile-menu-actions" id="mobileNavActions">
+    <button class="btn btn-ghost" onclick="openLoginModal();closeMobileMenu()">Se connecter</button>
+    <button class="btn btn-primary">S'abonner</button>
+  </div>
+</div>
+
+<!-- ── ADMIN BAR (hidden by default) ─────────── -->
+<div class="admin-bar" id="adminBar" style="display:none">
+  <div class="admin-bar-inner">
+    <div class="admin-bar-title">
+      Tableau de bord Admin
+      <small>Connecté en tant que <strong>admin</strong></small>
+    </div>
+    <div class="admin-stats">
+      <div class="admin-stat">
+        <div class="admin-stat-num" id="statTotal">0</div>
+        <div class="admin-stat-lbl">Articles</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="background:#1A7A4A;border-color:#1A7A4A" onclick="openNewArticleModal()">
+      + Nouvelle publication
+    </button>
+    <button class="btn btn-ghost" style="color:#8A9DB5;border-color:#2A4A6A" onclick="doLogout()">Déconnexion</button>
+  </div>
+</div>
+
+<!-- ── PAGE ARTICLE (vue lecture) ────────────── -->
+<div id="articlePage">
+  <div class="article-page-wrap">
+    <div id="articlePageContent"></div>
+  </div>
+</div>
+
+<!-- ── PAGE ACCUEIL ───────────────────────────── -->
+<div id="homePage">
+<!-- ── PAGE ───────────────────────────────────── -->
+<main class="page">
+
+  <!-- Category pills -->
+
+  <!-- Hero section -->
+  <div class="hero-grid" id="heroSection">
+    <!-- Dynamically filled -->
+  </div>
+
+  <!-- Liste d'articles pleine largeur -->
+  <div>
+    <div class="section-hd">
+      <h3>Tous les rapports</h3>
+    </div>
+    <div class="article-list" id="articleList">
+      <!-- Dynamically filled -->
+    </div>
+  </div>
+
+  <!-- Newsletter pleine largeur -->
+  <div class="newsletter-full">
+    <div class="nl-full-inner">
+      <div class="nl-full-text">
+        <h3>Briefing quotidien</h3>
+        <p>Chaque matin à 7h30, les 5 points essentiels des marchés et un rapport à ne pas manquer — directement dans votre boîte mail.</p>
+      </div>
+      <div class="nl-full-form">
+        <input class="nl-input" type="email" placeholder="votre@email.com" />
+        <button class="nl-btn">S'abonner gratuitement</button>
+        <p class="nl-note">Sans engagement · Désabonnement en un clic</p>
+      </div>
+    </div>
+  </div>
+</main>
+</div><!-- /homePage -->
+
+<!-- ── FOOTER ─────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span style="font-family:'DM Serif Display',serif;font-size:22px;color:#C4D0DE;">SMF<span style="color:#5B9BD5;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;margin-left:8px;letter-spacing:0.02em;">Smart Market Fundamentals</span></span>
+      <p>La référence indépendante pour la recherche et l'analyse financière en langue française. Rapports sectoriels, analyses macro et études de marché par des professionnels certifiés.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Rubriques</h4>
+      <a href="#">Marchés actions</a><a href="#">Obligataire</a><a href="#">Matières premières</a><a href="#">Crypto &amp; actifs numériques</a><a href="#">ESG &amp; finance durable</a>
+    </div>
+    <div class="footer-col">
+      <h4>Ressources</h4>
+      <a href="#">Bibliothèque de rapports</a><a href="#">Données &amp; statistiques</a><a href="#">Glossaire financier</a><a href="#">Nos analystes</a><a href="#">API</a>
+    </div>
+    <div class="footer-col">
+      <h4>SMF</h4>
+      <a href="#">À propos</a><a href="#">Devenir contributeur</a><a href="#">Abonnements</a><a href="#">Contact</a><a href="#">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SMF — Smart Market Fundamentals. Tous droits réservés.</span>
+    <span>Les informations publiées ne constituent pas des conseils en investissement.</span>
+  </div>
+</footer>
+
+<script>
+// ── CONFIG ────────────────────────────────────
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = '70340674';
+const STORAGE_KEY = 'finpulse_articles';
+
+// ── STATE ─────────────────────────────────────
+let isAdmin = false;
+let editingId = null;
+let editingPages = {};
+let currentPageTag = '';
+let currentArticleId = null;
+let deletingId = null;
+let currentFilter = '';
+
+// ── DEFAULT ARTICLES ─────────────────────────
+const defaultArticles = [];
+
+// ── STORAGE ───────────────────────────────────
+function loadArticles() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch(e) {}
+  return [];
+}
+
+function saveArticles(articles) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(articles)); } catch(e) {}
+}
+
+let articles = loadArticles();
+
+// ── RENDER ────────────────────────────────────
+const THUMB_ICONS = {
+  blue: `<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>`,
+  green: `<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  amber: `<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>`,
+  red: `<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  navy: `<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`
+};
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+function getCatColor(cat) { return (cat || 'blue|').split('|')[0]; }
+function getCatLabel(cat) { return (cat || 'blue|').split('|')[1] || ''; }
+
+function tagHTML(catVal) {
+  if (!catVal) return '';
+  const [color, label] = catVal.split('|');
+  return `<span class="tag tag-${color}">${label}</span>`;
+}
+
+function pageTagsHTML(a) {
+  if (!a.pages) return '';
+  return Object.keys(a.pages).map(k => tagHTML(k)).join('');
+}
+
+function adminActionsHTML(id) {
+  if (!isAdmin) return '';
+  return `<div class="art-admin-actions">
+    <button class="art-action-btn art-edit-btn" onclick="openEditModal('${id}',event)">✎ Modifier</button>
+    <button class="art-action-btn art-del-btn" onclick="openDeleteModal('${id}',event)">✕ Supprimer</button>
+  </div>`;
+}
+
+function renderHero() {
+  const featured = articles.find(a => a.featured) || articles[0];
+  const sideArticles = articles.filter(a => a.id !== (featured?.id)).slice(0,3);
+  const heroEl = document.getElementById('heroSection');
+  if (!featured) { heroEl.innerHTML = ''; return; }
+
+  const thumbColor = getCatColor(featured.category);
+  const heroVisualInner = featured.coverImage
+    ? `<img src="${featured.coverImage}" alt="${featured.title}" />`
+    : `<div class="hero-chart">
+          ${[32,48,41,67,54,78,71,59,88,74,66,82].map((h,i) => `<div class="hbar ${h>70?'hi':''}" style="height:${h}%"></div>`).join('')}
+        </div>
+        <span class="hero-period">${featured.category ? getCatLabel(featured.category) : ''} · 2026</span>`;
+  heroEl.innerHTML = `
+    <div class="hero-card">
+      <div class="hero-visual${featured.coverImage?' has-cover':''}">
+        <span class="hero-badge">Rapport vedette</span>
+        ${heroVisualInner}
+      </div>
+      <div class="hero-body">
+        <div class="hero-tags">
+          ${tagHTML(featured.category)}
+          ${pageTagsHTML(featured)}
+          <span class="new-badge">Nouveau</span>
+          ${isAdmin ? `<button class="art-action-btn art-edit-btn" style="margin-left:auto" onclick="openEditModal('${featured.id}',event)">✎ Modifier</button>
+          <button class="art-action-btn art-del-btn" onclick="openDeleteModal('${featured.id}',event)">✕</button>` : ''}
+        </div>
+        <h2>${featured.title}</h2>
+        <p class="hero-excerpt">${featured.excerpt}</p>
+        <div class="article-footer">
+          <div class="avatar">${getInitials(featured.author)}</div>
+          <span class="footer-author">${featured.author}</span>
+          <span class="footer-sep">·</span>
+          <span>${featured.date}</span>
+          ${featured.readTime ? `<span class="footer-sep">·</span><span>${featured.readTime} de lecture</span>` : ''}
+          ${featured.pages ? `<span class="footer-sep">·</span><span>${featured.pages}</span>` : ''}
+          <span class="footer-dl" onclick="openArticleNewTab('${featured.id}', event)" style="cursor:pointer;color:var(--blue)">Lire l'article →</span>
+          <span class="footer-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-side">
+      ${sideArticles.map(a => {
+        const sc = getCatColor(a.category);
+        const sideIconInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[sc]||THUMB_ICONS.blue);
+        return `<div class="side-card" style="position:relative" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+          <div class="side-icon si-${sc}${a.coverImage?' has-cover':''}">${sideIconInner}</div>
+          <div class="side-body">
+            <div class="side-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
+            <div class="side-title">${a.title}</div>
+            <div class="side-footer"><span>${a.author}</span><span>·</span><span>${a.date}</span>${a.readTime?`<span>·</span><span>${a.readTime}</span>`:''}</div>
+          </div>
+          ${adminActionsHTML(a.id)}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderArticleList() {
+  const listEl = document.getElementById('articleList');
+  const featured = articles.find(a => a.featured);
+
+  let list = articles.filter(a => a.id !== (featured?.id));
+
+  // Si un filtre est actif, n'afficher que les articles de cette catégorie
+  if (currentFilter) {
+    list = list.filter(a =>
+      (a.category||'').includes(currentFilter) ||
+      Object.keys(a.pages||{}).some(k => k.includes(currentFilter))
+    );
+  }
+
+  if (list.length === 0) {
+    listEl.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg><p>Aucun article trouvé${currentFilter ? ' pour « ' + currentFilter + ' »' : ''}.</p>${isAdmin ? '<p style="margin-top:8px;font-size:13px">Créez votre première publication via le tableau de bord.</p>' : ''}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = list.map(a => {
+    const c = getCatColor(a.category);
+    const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
+    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+      <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
+      <div class="art-content">
+        <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
+        <div class="art-title">${a.title}</div>
+        <div class="art-excerpt-sm">${a.excerpt}</div>
+        <div class="art-meta">
+          <div class="avatar">${getInitials(a.author)}</div>
+          <span>${a.author}</span>
+          <span class="footer-sep">·</span>
+          <span>${a.date}</span>
+          ${a.readTime ? `<span class="footer-sep">·</span><span>${a.readTime}</span>` : ''}
+        </div>
+      </div>
+      ${adminActionsHTML(a.id)}
+    </div>`;
+  }).join('');
+}
+
+function renderBancCentrale() {
+  const el = document.getElementById('bancCentraleList');
+  if (!el) return;
+  const list = articles
+    .filter(a => (a.category||'').includes('Central Banks') || Object.keys(a.pages||{}).some(k => k.includes('Central Banks')))
+    .slice(0, 5);
+  if (list.length === 0) {
+    el.innerHTML = `<div style="padding:16px 16px 12px;font-size:13px;color:var(--txt-faint);text-align:center">Aucun article pour ce filtre.</div>`;
+    return;
+  }
+  el.innerHTML = list.map((a, i) => `
+    <div class="bc-article-row" onclick="openArticleNewTab('${a.id}', event)">
+      <span class="bc-article-num">0${i+1}</span>
+      <div class="bc-article-body">
+        <div class="bc-article-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</div>
+        <div class="bc-article-date">${a.author} · ${a.date}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTopPicks() {
+  const picks = articles.slice(0,5);
+  const colors = ['navy','blue','red','amber','green'];
+  const el = document.getElementById('topPicksList');
+  if (!el) return;
+  el.innerHTML = picks.map((a,i) => `
+    <div class="pick-row">
+      <span class="pick-num">0${i+1}</span>
+      <span class="pick-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</span>
+      ${tagHTML(`${colors[i%5]}|${getCatLabel(a.category)}`)}
+    </div>`).join('');
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = articles.length;
+}
+
+// ── RECHERCHE ─────────────────────────────────
+function handleSearch(query) {
+  const q = query.trim().toLowerCase();
+  const clearBtn = document.getElementById('navSearchClear');
+  if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+
+  if (!q) {
+    currentFilter = '';
+    document.querySelectorAll('.nav-links a').forEach((a, i) => a.classList.toggle('active', i === 0));
+    document.getElementById('heroSection').style.display = '';
+    const sectionTitle = document.querySelector('.section-hd h3');
+    if (sectionTitle) sectionTitle.textContent = 'Tous les rapports';
+    renderArticleList();
+    return;
+  }
+
+  document.getElementById('heroSection').style.display = 'none';
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const sectionTitle = document.querySelector('.section-hd h3');
+  if (sectionTitle) sectionTitle.textContent = `Résultats pour « ${query.trim()} »`;
+
+  const featured = articles.find(a => a.featured);
+  const results = articles.filter(a =>
+    a.id !== (featured?.id) &&
+    (a.title.toLowerCase().includes(q) ||
+     a.excerpt.toLowerCase().includes(q) ||
+     a.author.toLowerCase().includes(q) ||
+     (a.category||'').toLowerCase().includes(q))
+  );
+
+  const listEl = document.getElementById('articleList');
+  if (results.length === 0) {
+    listEl.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>Aucun résultat pour « ${query.trim()} ».</p></div>`;
+    return;
+  }
+
+  listEl.innerHTML = results.map(a => {
+    const c = getCatColor(a.category);
+    const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
+    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+      <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
+      <div class="art-content">
+        <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
+        <div class="art-title">${a.title}</div>
+        <div class="art-excerpt-sm">${a.excerpt}</div>
+        <div class="art-meta">
+          <div class="avatar">${getInitials(a.author)}</div>
+          <span>${a.author}</span>
+          <span class="footer-sep">·</span>
+          <span>${a.date}</span>
+        </div>
+      </div>
+      ${adminActionsHTML(a.id)}
+    </div>`;
+  }).join('');
+}
+
+function closeSearch() {
+  const input = document.getElementById('navSearchInput');
+  if (input) { input.value = ''; handleSearch(''); }
+}
+
+function renderAll() {
+  renderHero();
+  renderArticleList();
+  renderBancCentrale();
+  updateStats();
+}
+
+// ── AUTH ──────────────────────────────────────
+function openLoginModal() {
+  document.getElementById('loginModal').classList.add('open');
+  setTimeout(() => document.getElementById('loginUser').focus(), 100);
+}
+
+function closeLoginModal() {
+  document.getElementById('loginModal').classList.remove('open');
+}
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    isAdmin = true;
+    closeLoginModal();
+    document.getElementById('adminBar').style.display = 'block';
+    document.getElementById('navActions').innerHTML = `<span class="admin-badge">● Admin</span><button class="btn btn-primary" style="background:#1A7A4A" onclick="openNewArticleModal()">+ Publier</button><button class="btn btn-ghost" onclick="doLogout()">Déconnexion</button>`;
+    renderAll();
+    syncMobileAdminMenu();
+    showToast('Bienvenue ! Vous êtes connecté en tant qu\'admin.', 'success');
+  } else {
+    err.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function doLogout() {
+  isAdmin = false;
+  document.getElementById('adminBar').style.display = 'none';
+  document.getElementById('navActions').innerHTML = `<button class="btn btn-ghost" onclick="openLoginModal()">Se connecter</button><button class="btn btn-primary">S'abonner</button>`;
+  renderAll();
+  syncMobileAdminMenu();
+  showToast('Vous avez été déconnecté.', 'success');
+}
+
+// ── ARTICLE MODAL ─────────────────────────────
+function resetTag2Options() {
+  const select = document.getElementById('fTag2');
+  select.innerHTML = `
+    <option value="">— Page principale —</option>
+    <option value="green|Forex">Forex</option>
+    <option value="navy|Central Banks">Central Banks</option>
+    <option value="blue|Trades">Trades</option>
+    <option value="amber|Autre">Autre</option>`;
+}
+
+function addPageOptionsFromPages(pages) {
+  const select = document.getElementById('fTag2');
+  Object.keys(pages || {}).forEach(tagVal => {
+    if (![...select.options].some(o => o.value === tagVal)) {
+      const [, label] = tagVal.split('|');
+      const opt = document.createElement('option');
+      opt.value = tagVal;
+      opt.textContent = label || tagVal;
+      select.appendChild(opt);
+    }
+  });
+}
+
+function openNewArticleModal() {
+  editingId = null;
+  editingPages = {};
+  currentPageTag = '';
+  document.getElementById('modalTitle').textContent = 'Nouvelle publication';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fExcerpt').value = '';
+  document.getElementById('fAuthor').value = '';
+  document.getElementById('fCategory').value = 'blue|Actions';
+  resetTag2Options();
+  document.getElementById('fTag2').value = '';
+  document.getElementById('fNewPageName').value = '';
+  document.getElementById('fContent').innerHTML = '';
+  savedEditorRange = null;
+  currentCoverImage = '';
+  document.getElementById('fCoverInput').value = '';
+  renderCoverPreview();
+  updateCharCount();
+  document.getElementById('articleModal').classList.add('open');
+  setTimeout(() => document.getElementById('fTitle').focus(), 100);
+}
+
+function openEditModal(id, e) {
+  if (e) e.stopPropagation();
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  editingId = id;
+  editingPages = JSON.parse(JSON.stringify(a.pages || {}));
+  editingPages[''] = a.content || '';
+  currentPageTag = '';
+  document.getElementById('modalTitle').textContent = 'Modifier l\'article';
+  document.getElementById('fTitle').value = a.title;
+  document.getElementById('fExcerpt').value = a.excerpt;
+  document.getElementById('fAuthor').value = a.author;
+  document.getElementById('fCategory').value = a.category || 'blue|Actions';
+  resetTag2Options();
+  addPageOptionsFromPages(a.pages);
+  document.getElementById('fTag2').value = '';
+  document.getElementById('fNewPageName').value = '';
+  document.getElementById('fFeatured').checked = !!a.featured;
+  document.getElementById('fContent').innerHTML = a.content || '';
+  savedEditorRange = null;
+  currentCoverImage = a.coverImage || '';
+  document.getElementById('fCoverInput').value = '';
+  renderCoverPreview();
+  updateCharCount();
+  document.getElementById('articleModal').classList.add('open');
+  setTimeout(() => document.getElementById('fTitle').focus(), 100);
+}
+
+function closeArticleModal() {
+  document.getElementById('articleModal').classList.remove('open');
+}
+
+// ── PAGES (TAG SECONDAIRE) ────────────────────
+// Le titre, le sous-titre et l'image de couverture sont communs à tout l'article.
+// Seul le contenu change selon la page (tag secondaire) sélectionnée.
+function switchEditorPage(newTag) {
+  // Sauvegarder le contenu de la page courante
+  editingPages[currentPageTag] = document.getElementById('fContent').innerHTML.trim();
+
+  // Charger le contenu de la nouvelle page (ou page principale)
+  currentPageTag = newTag;
+  document.getElementById('fContent').innerHTML = editingPages[newTag] || '';
+  savedEditorRange = null;
+  updateCharCount();
+}
+
+function addCustomPage() {
+  const input = document.getElementById('fNewPageName');
+  const name = input.value.trim();
+  if (!name) { showToast('Veuillez saisir un nom de page.', 'error'); return; }
+
+  const tagVal = 'navy|' + name;
+  const select = document.getElementById('fTag2');
+
+  // Ajouter l'option si elle n'existe pas déjà dans le select
+  if (![...select.options].some(o => o.value === tagVal)) {
+    const opt = document.createElement('option');
+    opt.value = tagVal;
+    opt.textContent = name;
+    select.appendChild(opt);
+  }
+
+  // Basculer sur cette page
+  select.value = tagVal;
+  switchEditorPage(tagVal);
+  input.value = '';
+}
+
+function saveArticle() {
+  // Capturer le contenu de la page en cours d'édition
+  editingPages[currentPageTag] = document.getElementById('fContent').innerHTML.trim();
+
+  const title = document.getElementById('fTitle').value.trim();
+  const excerpt = document.getElementById('fExcerpt').value.trim();
+  const author = document.getElementById('fAuthor').value.trim();
+  if (!title || !excerpt || !author) { showToast('Veuillez remplir les champs obligatoires (*).', 'error'); return; }
+
+  const featured = document.getElementById('fFeatured').checked;
+  if (featured) articles.forEach(a => a.featured = false);
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const content = editingPages[''] || '';
+  const coverImage = currentCoverImage || '';
+
+  // Pages secondaires (toutes sauf la page principale ''), uniquement si non vides
+  const pages = {};
+  Object.keys(editingPages).forEach(key => {
+    if (key === '') return;
+    if (editingPages[key]) pages[key] = editingPages[key];
+  });
+
+  if (editingId) {
+    const idx = articles.findIndex(a => a.id === editingId);
+    if (idx !== -1) {
+      articles[idx] = { ...articles[idx], title, excerpt, author, content, coverImage, pages,
+        category: document.getElementById('fCategory').value,
+        featured, date: articles[idx].date };
+    }
+    showToast('Article mis à jour avec succès !', 'success');
+  } else {
+    articles.unshift({ id: 'art_' + Date.now(), title, excerpt, author, content, coverImage, pages,
+      category: document.getElementById('fCategory').value,
+      featured, date: dateStr });
+    showToast('Article publié avec succès !', 'success');
+  }
+
+  saveArticles(articles);
+  closeArticleModal();
+  renderAll();
+}
+
+// ── DELETE ────────────────────────────────────
+function openDeleteModal(id, e) {
+  if (e) e.stopPropagation();
+  deletingId = id;
+  const a = articles.find(x => x.id === id);
+  document.getElementById('deleteTitle').textContent = a?.title || '';
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deletingId = null;
+}
+
+function confirmDelete() {
+  if (!deletingId) return;
+  articles = articles.filter(a => a.id !== deletingId);
+  if (articles.length > 0 && !articles.find(a => a.featured)) articles[0].featured = true;
+  saveArticles(articles);
+  closeDeleteModal();
+  renderAll();
+  showToast('Article supprimé.', 'success');
+}
+
+// ── FILTER ────────────────────────────────────
+function filterCat(el, cat, e) {
+  if (e) e.preventDefault();
+  document.querySelectorAll('.nav-links a').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  currentFilter = cat;
+
+  // Accueil : hero visible + tous les articles
+  const hero = document.getElementById('heroSection');
+  const sectionTitle = document.querySelector('.section-hd h3');
+  if (!cat) {
+    hero.style.display = '';
+    if (sectionTitle) sectionTitle.textContent = 'Tous les rapports';
+  } else {
+    hero.style.display = 'none';
+    if (sectionTitle) sectionTitle.textContent = cat;
+  }
+
+  renderArticleList();
+}
+
+// ── TOAST ─────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  document.getElementById('toastMsg').textContent = msg;
+  icon.className = `toast-icon toast-${type}`;
+  icon.textContent = type === 'success' ? '✓' : '✕';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── OPEN ARTICLE PAGE ────────────────────────
+function openArticleNewTab(id, e) {
+  if (e) e.stopPropagation();
+  const url = new URL(window.location.href);
+  url.searchParams.set('article', id);
+  window.open(url.toString(), '_blank');
+}
+
+function openArticle(id, skipHistory) {
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  currentArticleId = id;
+  renderArticlePageContent(id, '');
+
+  document.getElementById('homePage').style.display = 'none';
+  document.getElementById('articlePage').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  if (!skipHistory) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('article', id);
+    history.pushState({ article: id }, '', url.toString());
+  }
+}
+
+function renderArticlePageContent(id, pageTag) {
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+
+  // Le contenu varie selon la page (tag), titre/sous-titre/image restent ceux de l'article
+  const pageContent = pageTag && a.pages && a.pages[pageTag] ? a.pages[pageTag] : a.content;
+
+  const adminBar = isAdmin ? `
+    <div class="art-page-admin-bar">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Vous êtes en mode Admin — <button class="art-action-btn art-edit-btn" style="margin-left:4px" onclick="openEditModal('${id}',event)">Modifier cet article</button>
+    </div>` : '';
+
+  const coverHTML = a.coverImage ? `<div class="art-page-cover"><img src="${a.coverImage}" alt="${a.title}" /></div>` : '';
+
+  const bodyHTML = pageContent ? pageContent : `
+    <p>Cet article n'a pas encore de contenu détaillé. ${isAdmin ? 'Cliquez sur <strong>Modifier</strong> pour ajouter le contenu complet.' : 'Revenez prochainement pour lire l\'analyse complète.'}</p>
+    <blockquote>${a.excerpt}</blockquote>`;
+
+  // Onglets : Page principale + une par tag présent dans a.pages
+  const pageKeys = Object.keys(a.pages || {});
+  const tabsHTML = pageKeys.length > 0 ? `
+    <div class="art-page-tabs">
+      <button class="art-page-tab${pageTag===''?' active':''}" onclick="renderArticlePageContent('${id}','')">${getCatLabel(a.category) || 'Principal'}</button>
+      ${pageKeys.map(k => `<button class="art-page-tab${pageTag===k?' active':''}" onclick="renderArticlePageContent('${id}','${k}')">${getCatLabel(k)}</button>`).join('')}
+    </div>` : '';
+
+  document.getElementById('articlePageContent').innerHTML = `
+    ${adminBar}
+    <div class="art-page-header">
+      <div class="art-page-tags">
+        ${a.featured ? '<span class="new-badge">Vedette</span>' : ''}
+      </div>
+      <h1 class="art-page-title">${a.title}</h1>
+      <p class="art-page-excerpt">${a.excerpt}</p>
+      ${coverHTML}
+      <div class="art-page-meta">
+        <div class="art-page-avatar">${getInitials(a.author)}</div>
+        <div>
+          <div class="art-page-author">${a.author}</div>
+          <div class="art-page-info">Publié le ${a.date}</div>
+        </div>
+        <div style="margin-left:auto">${pageTag ? tagHTML(pageTag) : tagHTML(a.category)}</div>
+      </div>
+    </div>
+    ${tabsHTML}
+    <div class="art-page-body">${bodyHTML}</div>
+    <div class="art-page-cta">
+      <div class="art-page-cta-text">
+        <h4>Accédez au rapport PDF complet</h4>
+        <p>Téléchargez l'analyse complète avec tableaux, graphiques et données détaillées.</p>
+      </div>
+      <button class="btn btn-primary">Télécharger PDF</button>
+    </div>`;
+}
+
+function closePage() {
+  document.getElementById('articlePage').style.display = 'none';
+  document.getElementById('homePage').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('article')) {
+    url.searchParams.delete('article');
+    history.pushState({}, '', url.toString());
+  }
+}
+
+window.addEventListener('popstate', () => {
+  const id = new URLSearchParams(window.location.search).get('article');
+  if (id) {
+    openArticle(id, true);
+  } else {
+    document.getElementById('articlePage').style.display = 'none';
+    document.getElementById('homePage').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+});
+
+
+// ── ÉDITEUR WYSIWYG : COMMANDES DE FORMAT ─────
+let savedEditorRange = null;
+
+function saveEditorSelection() {
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    const editor = document.getElementById('fContent');
+    if (editor && editor.contains(range.commonAncestorContainer)) {
+      savedEditorRange = range.cloneRange();
+    }
+  }
+}
+
+function restoreEditorSelection() {
+  const editor = document.getElementById('fContent');
+  editor.focus();
+  if (savedEditorRange) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedEditorRange);
+  }
+}
+
+function insertFormat(command, value) {
+  restoreEditorSelection();
+  try {
+    document.execCommand(command, false, value || null);
+  } catch (e) {}
+  saveEditorSelection();
+  updateCharCount();
+}
+
+// ── SÉLECTEUR DE COULEURS (style Word) ────────
+const THEME_COLOR_ROWS = [
+  ['#FFFFFF','#000000','#A6A6A6','#5B7DA8','#ED7D31','#FFC000','#FFD966','#70AD47','#4472C4','#264478'],
+  ['#F2F2F2','#7F7F7F','#D9D9D9','#D6E2F0','#FBDDC9','#FFF0CC','#FFF7DD','#E1EFD9','#DAE3F3','#C5D2E8'],
+  ['#D9D9D9','#595959','#BFBFBF','#ADC6E5','#F7BD9C','#FFD966','#FFEEAA','#C5E0B3','#B4C7E7','#8EAADB'],
+  ['#BFBFBF','#3F3F3F','#A6A6A6','#8FAADC','#F4975A','#FFC000','#FFE699','#A8D08D','#8FAADC','#5B82BB'],
+  ['#A6A6A6','#262626','#7F7F7F','#5B82BB','#ED7D31','#BF8F00','#FFD966','#70AD47','#4472C4','#2F5496'],
+  ['#808080','#0D0D0D','#595959','#41719C','#C45911','#806000','#BF9000','#548235','#2F5496','#1F3864']
+];
+const STANDARD_COLORS = ['#C00000','#FF0000','#FFC000','#FFFF00','#92D050','#00B050','#00B0F0','#0070C0','#002060','#7030A0'];
+const HL_COLORS = ['#FFFF00','#00FF00','#00FFFF','#FF00FF','#0000FF','#FF0000','#000080','#008080','#008000','#800080','#800000','#808000','#C0C0C0','#FFFFFF','#FEF3DC'];
+
+function buildColorMenu(menuId, kind) {
+  const menu = document.getElementById(menuId);
+  if (!menu) return;
+  let html = '';
+  if (kind === 'text') {
+    html += `<div class="color-menu-label">Couleurs du thème</div><div class="color-grid theme-grid">`;
+    THEME_COLOR_ROWS.forEach(row => row.forEach(c => {
+      html += `<button type="button" class="color-swatch" style="background:${c}" title="${c}" onclick="applyPickedColor('foreColor','${c}','textColorIcon')"></button>`;
+    }));
+    html += `</div>`;
+    html += `<div class="color-menu-label">Couleurs standard</div><div class="color-grid">`;
+    STANDARD_COLORS.forEach(c => {
+      html += `<button type="button" class="color-swatch" style="background:${c}" title="${c}" onclick="applyPickedColor('foreColor','${c}','textColorIcon')"></button>`;
+    });
+    html += `</div>`;
+    html += `<div class="color-menu-more" onclick="openNativeColorPicker('fTextColor')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Plus de couleurs…</div>`;
+  } else {
+    html += `<div class="color-menu-label">Couleurs de surlignage</div><div class="color-grid">`;
+    HL_COLORS.forEach(c => {
+      html += `<button type="button" class="color-swatch" style="background:${c}" title="${c}" onclick="applyPickedColor('hiliteColor','${c}','hlColorIcon',true)"></button>`;
+    });
+    html += `</div>`;
+    html += `<div class="color-menu-more" onclick="openNativeColorPicker('fHlColor')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Plus de couleurs…</div>`;
+  }
+  menu.innerHTML = html;
+}
+
+function toggleColorMenu(menuId, e) {
+  if (e) e.stopPropagation();
+  saveEditorSelection();
+  document.querySelectorAll('.color-menu').forEach(m => {
+    if (m.id !== menuId) m.classList.remove('open');
+  });
+  const menu = document.getElementById(menuId);
+  if (!menu.dataset.built) {
+    buildColorMenu(menuId, menuId === 'textColorMenu' ? 'text' : 'hl');
+    menu.dataset.built = '1';
+  }
+  menu.classList.toggle('open');
+}
+
+function applyPickedColor(command, color, iconId, isHighlight) {
+  insertFormat(command, color);
+  const icon = document.getElementById(iconId);
+  if (icon) {
+    if (isHighlight) icon.style.backgroundColor = color;
+    else icon.style.color = color;
+  }
+  document.querySelectorAll('.color-menu').forEach(m => m.classList.remove('open'));
+}
+
+function openNativeColorPicker(inputId) {
+  document.querySelectorAll('.color-menu').forEach(m => m.classList.remove('open'));
+  document.getElementById(inputId).click();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.color-picker-wrap')) {
+    document.querySelectorAll('.color-menu').forEach(m => m.classList.remove('open'));
+  }
+});
+
+function updateCharCount() {
+  const el = document.getElementById('fContent');
+  const c = el ? (el.innerText || '').trim().length : 0;
+  const cc = document.getElementById('charCount');
+  if (cc) cc.textContent = c + ' caractère' + (c > 1 ? 's' : '');
+}
+
+// ── IMAGES : COUVERTURE ───────────────────────
+let currentCoverImage = '';
+
+function handleCoverImageChange(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentCoverImage = ev.target.result;
+    renderCoverPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeCoverImage(e) {
+  if (e) e.stopPropagation();
+  currentCoverImage = '';
+  document.getElementById('fCoverInput').value = '';
+  renderCoverPreview();
+}
+
+function renderCoverPreview() {
+  const wrap = document.getElementById('coverPreviewWrap');
+  const title = document.getElementById('coverInfoTitle');
+  const removeBtn = document.getElementById('coverRemoveBtn');
+  if (currentCoverImage) {
+    wrap.innerHTML = `<img src="${currentCoverImage}" alt="Couverture" />`;
+    title.textContent = 'Image de couverture sélectionnée';
+    removeBtn.style.display = 'inline-block';
+  } else {
+    wrap.innerHTML = `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`;
+    title.textContent = 'Aucune image sélectionnée';
+    removeBtn.style.display = 'none';
+  }
+}
+
+// ── IMAGES : DANS LE CONTENU ───────────────────
+function handleInlineImageChange(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    restoreEditorSelection();
+    const img = `<img src="${ev.target.result}" alt="" />`;
+    try {
+      document.execCommand('insertHTML', false, img);
+    } catch (err) {
+      document.getElementById('fContent').innerHTML += img;
+    }
+    saveEditorSelection();
+    updateCharCount();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+// ── CLOSE ON OVERLAY CLICK ────────────────────
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+    }
+  });
+});
+
+// ── CHAR COUNT LISTENER ───────────────────────
+document.addEventListener('input', e => {
+  if (e.target.id === 'fContent') updateCharCount();
+});
+
+// ── SAUVEGARDE DE LA SÉLECTION (pour color pickers) ─
+['mouseup', 'keyup'].forEach(evt => {
+  document.addEventListener(evt, e => {
+    if (e.target.id === 'fContent' || e.target.closest?.('#fContent')) saveEditorSelection();
+  });
+});
+
+// Empêcher les clics admin de propager vers openArticle
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('art-action-btn') || e.target.classList.contains('art-edit-btn') || e.target.classList.contains('art-del-btn')) {
+    e.stopPropagation();
+  }
+});
+
+
+// ── MENU MOBILE ───────────────────────────────
+function toggleMobileMenu() {
+  const btn = document.getElementById('hamburgerBtn');
+  const menu = document.getElementById('mobileMenu');
+  btn.classList.toggle('open');
+  menu.classList.toggle('open');
+  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+}
+
+function closeMobileMenu() {
+  document.getElementById('hamburgerBtn').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Fermer le menu mobile si on clique en dehors
+document.addEventListener('click', e => {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('hamburgerBtn');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    closeMobileMenu();
+  }
+});
+
+// Sync état admin dans le menu mobile
+function syncMobileAdminMenu() {
+  const mobileActions = document.getElementById('mobileNavActions');
+  if (!mobileActions) return;
+  if (isAdmin) {
+    mobileActions.innerHTML = `<span class="admin-badge" style="text-align:center">● Admin</span><button class="btn btn-primary" style="background:#1A7A4A" onclick="openNewArticleModal();closeMobileMenu()">+ Publier</button><button class="btn btn-ghost" onclick="doLogout();closeMobileMenu()">Déconnexion</button>`;
+  } else {
+    mobileActions.innerHTML = `<button class="btn btn-ghost" onclick="openLoginModal();closeMobileMenu()">Se connecter</button><button class="btn btn-primary">S'abonner</button>`;
+  }
+}
+
+// ── INIT ──────────────────────────────────────
+renderAll();
+
+// Si l'URL contient ?article=ID (nouvel onglet), afficher directement l'article
+(function initFromUrl() {
+  const id = new URLSearchParams(window.location.search).get('article');
+  if (id && articles.find(a => a.id === id)) {
+    openArticle(id, true);
+  }
+})();
+
+</script>
+</body>
+</html>
