@@ -203,7 +203,7 @@
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,34,64,0.55); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
-  .modal-head { background: var(--navy); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-head { background: var(--navy); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; overflow: visible; }
   .modal-head h2 { font-family: var(--serif); font-size: 18px; color: #fff; }
   .modal-close { background: transparent; border: none; color: #8A9DB5; font-size: 22px; cursor: pointer; line-height: 1; padding: 0; }
   .modal-close:hover { color: #fff; }
@@ -217,7 +217,7 @@
   .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
 
   /* Modale plein écran (éditeur d'article) */
-  .modal-large { max-width: 1100px; width: 100%; height: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; }
+  .modal-large { max-width: 1100px; width: 100%; height: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; overflow: visible; }
   .modal-large .modal-head, .modal-large .modal-footer { flex-shrink: 0; }
   .modal-large .modal-body { flex: 1; overflow-y: auto; }
   .modal-large #fContent { min-height: 380px; max-height: none; }
@@ -295,7 +295,7 @@
   .art-page-stat { font-family: var(--mono); font-size: 12px; color: var(--txt-faint); background: var(--bg); padding: 4px 10px; border-radius: 4px; }
   .art-page-body { font-size: 16px; line-height: 1.85; color: var(--txt); }
   .art-page-body img { max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 24px auto; }
-  .art-page-body h2 { font-family: var(--serif); font-size: 22px; color: var(--navy); margin: 32px 0 12px; }
+  .art-page-body h2 { font-family: var(--sans); font-weight: 700; font-size: 22px; color: var(--navy); margin: 32px 0 12px; }
   .art-page-body h3 { font-size: 17px; font-weight: 600; color: var(--navy); margin: 24px 0 8px; }
   .art-page-body p { margin-bottom: 18px; }
   .art-page-body ul, .art-page-body ol { padding-left: 24px; margin-bottom: 18px; }
@@ -311,13 +311,14 @@
   .art-page-admin-bar svg { width: 16px; height: 16px; stroke: var(--amber); fill: none; stroke-width: 2; flex-shrink: 0; }
 
   /* Éditeur de contenu (WYSIWYG) */
-  .editor-toolbar { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); align-items: center; }
+  .editor-toolbar { display: flex; gap: 3px; flex-wrap: nowrap; padding: 6px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); align-items: center; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.15) transparent; white-space: nowrap; }
   .editor-toolbar-side { position: sticky; top: 0; z-index: 10; }
 
-  /* Dark toolbar in modal head */
-  .modal-head-article { flex-wrap: wrap; gap: 12px; padding: 14px 24px; }
-  .modal-head-article h2 { flex-shrink: 0; }
-  .editor-toolbar-head { flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 6px; order: 3; flex-basis: 100%; }
+  /* Dark toolbar in modal head — 2 lignes : titre + bouton × sur ligne 1, toolbar sur ligne 2 */
+  .modal-head-article { flex-wrap: wrap; gap: 0; padding: 0; overflow: visible; }
+  .modal-head-article-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; width: 100%; }
+  .modal-head-article h2 { flex-shrink: 0; font-size: 15px; }
+  .editor-toolbar-head { width: 100%; background: rgba(255,255,255,0.06); border: none; border-top: 1px solid rgba(255,255,255,0.12); padding: 7px 12px; flex-wrap: nowrap; overflow: visible; scrollbar-width: none; }
   .editor-select-dark { background: rgba(255,255,255,0.08); color: #C8DAEF; border-color: rgba(255,255,255,0.15); }
   .editor-select-dark:hover { border-color: #5DD99B; color: #5DD99B; }
   .editor-select-dark option { color: #111; }
@@ -327,7 +328,11 @@
   .editor-color-btn-dark { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
   .editor-color-btn-dark .editor-color-icon { color: #C8DAEF; }
 
-  /* Custom color picker (style Word) */
+  .editor-dd-wrap { position: relative; flex-shrink: 0; }
+  .editor-dd { display: none; position: fixed; background: #1e3352; border: 1px solid rgba(255,255,255,0.18); border-radius: var(--radius); padding: 4px; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); min-width: 110px; }
+  .editor-dd.open { display: block; }
+  .editor-dd button { display: block; width: 100%; text-align: left; background: none; border: none; color: #C8DAEF; font-family: var(--sans); font-size: 12px; padding: 6px 10px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+  .editor-dd button:hover { background: rgba(255,255,255,0.12); color: #fff; }
   .color-picker-wrap { position: relative; }
   .color-picker-trigger { display: flex; align-items: center; justify-content: center; width: 30px; height: 26px; padding: 0; }
   .color-menu { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: #2A3F5A; border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius); padding: 10px; width: 220px; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
@@ -345,7 +350,7 @@
   .editor-btn { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-muted); transition: all 0.1s; font-family: var(--sans); }
   .editor-btn:hover { background: var(--blue-lt); color: var(--blue); border-color: var(--blue); }
   .editor-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
-  .editor-select { font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-muted); font-family: var(--sans); max-width: 110px; }
+  .editor-select { font-size: 12px; font-weight: 500; padding: 4px 6px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--txt-muted); font-family: var(--sans); max-width: 96px; flex-shrink: 0; }
   .editor-select:hover { border-color: var(--blue); color: var(--blue); }
   .editor-color-btn { position: relative; display: flex; align-items: center; justify-content: center; width: 30px; height: 26px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); transition: all 0.1s; overflow: hidden; }
   .editor-color-btn:hover { border-color: var(--blue); }
@@ -354,18 +359,96 @@
   #textColorIcon::after { background: #C0392B; }
   .editor-hl-icon { background: transparent; padding: 0 2px; border-radius: 2px; }
   #hlColorIcon::after { background: #FEF3DC; border: 1px solid var(--border-md); }
+  #bgColorIcon { background: #FEF3DC; border: 1px solid var(--border-md); }
   .editor-color-btn input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; }
   #fContent { border: 1px solid var(--border); border-radius: var(--radius); min-height: 220px; max-height: 420px; overflow-y: auto; font-family: var(--sans); font-size: 14px; line-height: 1.7; padding: 14px 16px; background: var(--surface); outline: none; color: var(--txt); }
   #fContent:focus { border-color: var(--blue); }
-  #fContent h2 { font-family: var(--serif); font-size: 20px; color: var(--navy); margin: 18px 0 8px; }
+  #fContent h2 { font-family: var(--sans); font-weight: 700; font-size: 20px; color: var(--navy); margin: 18px 0 8px; }
   #fContent h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin: 14px 0 6px; }
   #fContent p { margin-bottom: 12px; }
   #fContent ul, #fContent ol { padding-left: 22px; margin-bottom: 12px; }
   #fContent blockquote { background: var(--blue-lt); border-left: 4px solid var(--blue); padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0; margin: 14px 0; color: var(--navy); font-style: italic; }
   #fContent img { max-width: 100%; border-radius: var(--radius); display: block; margin: 14px 0; }
   #fContent img.editor-img-selected { outline: 2px solid var(--blue); }
+
+  /* Tailles d'image simple, centrées */
+  #fContent img.img-size-small, .art-page-body img.img-size-small { width: 33%; margin-left: auto; margin-right: auto; }
+  #fContent img.img-size-medium, .art-page-body img.img-size-medium { width: 50%; margin-left: auto; margin-right: auto; }
+  #fContent img.img-size-large, .art-page-body img.img-size-large { width: 75%; margin-left: auto; margin-right: auto; }
+  #fContent img.img-size-full, .art-page-body img.img-size-full { width: 100%; }
+  @media (max-width: 640px) {
+    #fContent img.img-size-small, .art-page-body img.img-size-small,
+    #fContent img.img-size-medium, .art-page-body img.img-size-medium { width: 60%; }
+    #fContent img.img-size-large, .art-page-body img.img-size-large { width: 90%; }
+  }
+
+  /* Barre flottante de redimensionnement d'image */
+  .img-size-toolbar { position: absolute; display: none; gap: 4px; background: #2A3F5A; border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius); padding: 4px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); z-index: 50; }
+  .img-size-toolbar.open { display: flex; }
+  .img-size-toolbar button { font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 4px; border: 1px solid transparent; background: rgba(255,255,255,0.08); color: #C8DAEF; cursor: pointer; font-family: var(--sans); }
+  .img-size-toolbar button:hover { background: rgba(255,255,255,0.18); color: #fff; }
+  .img-size-toolbar button.active { background: var(--blue); color: #fff; }
   #fContent hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
   #fContent:empty::before { content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none; }
+
+  /* Groupes d'images côte à côte */
+  .img-row { display: flex; gap: 10px; margin: 14px 0; }
+  #fContent .img-row img, .art-page-body .img-row img { flex: 1; min-width: 0; max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 0; object-fit: cover; }
+  .img-row .img-row-spacer { flex: 1; min-width: 0; }
+  .art-page-body .img-row { margin: 24px 0; }
+
+  /* Image + texte côte à côte */
+  .img-text-row { display: flex; gap: 18px; margin: 14px 0; align-items: flex-start; }
+  .img-text-row .img-text-media { flex: 0 0 38%; max-width: 38%; }
+  #fContent .img-text-row .img-text-media img, .art-page-body .img-text-row .img-text-media img { width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 0; }
+  .img-text-row .img-text-content { flex: 1; min-width: 0; }
+  .img-text-row .img-text-content p { margin: 0; }
+  #fContent .img-text-content p.ghost-empty::before { content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none; font-style: italic; }
+  .art-page-body .img-text-row { margin: 24px 0; }
+  @media (max-width: 640px) {
+    .img-text-row { flex-direction: column; }
+    .img-text-row .img-text-media { flex: 1 1 auto; max-width: 100%; }
+  }
+
+  /* Modal choix de disposition d'images */
+  .img-layout-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .img-layout-opt-wide { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 12px 16px; }
+  .img-layout-opt-wide .img-layout-preview { flex: 1; flex-direction: column; gap: 5px; height: auto; justify-content: center; }
+  .img-layout-opt-wide .img-layout-label { font-size: 13px; white-space: nowrap; }
+  .ils-bar { display: block; height: 8px; background: var(--border-md); border-radius: 2px; }
+  .img-layout-preview-sized { display: flex; flex-direction: column; gap: 5px; height: auto !important; width: 100%; }
+
+  /* Size choice grid */
+  .img-size-choice-grid { display: flex; flex-direction: column; gap: 8px; }
+  .img-size-choice-opt { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: var(--sans); text-align: left; }
+  .img-size-choice-opt:hover { border-color: var(--blue); background: var(--blue-lt); }
+  .img-size-choice-bar-wrap { width: 140px; flex-shrink: 0; }
+  .img-size-choice-bar { height: 10px; background: var(--border-md); border-radius: 3px; transition: background 0.12s; }
+  .img-size-choice-opt:hover .img-size-choice-bar { background: var(--blue); }
+  .img-size-choice-labels { display: flex; gap: 8px; align-items: baseline; }
+  .img-size-choice-name { font-size: 13px; font-weight: 500; color: var(--navy); }
+  .img-size-choice-pct { font-size: 11px; color: var(--txt-faint); font-family: var(--mono); }
+  .img-layout-opt { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: var(--sans); }
+  .img-layout-opt:hover { border-color: var(--blue); background: var(--blue-lt); }
+  .img-layout-preview { display: flex; gap: 4px; width: 100%; height: 36px; }
+  .img-layout-preview span { flex: 1; background: var(--border-md); border-radius: 3px; }
+  .img-layout-preview span.img-layout-text { background: var(--border); position: relative; }
+  .img-layout-preview span.img-layout-text::before, .img-layout-preview span.img-layout-text::after { content: ''; position: absolute; left: 15%; right: 15%; height: 3px; background: var(--txt-faint); border-radius: 2px; }
+  .img-layout-preview span.img-layout-text::before { top: 30%; }
+  .img-layout-preview span.img-layout-text::after { top: 55%; right: 35%; }
+  .img-layout-label { font-size: 12px; font-weight: 500; color: var(--txt-muted); }
+
+  /* Slots d'upload individuels */
+  .img-slots-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .img-slot { flex: 1; min-width: 0; aspect-ratio: 1; border: 1.5px dashed var(--border-md); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: var(--bg); transition: border-color 0.12s, background 0.12s; }
+  .img-slot:hover { border-color: var(--blue); background: var(--blue-lt); }
+  .img-slot.filled { border-style: solid; border-color: var(--border); }
+  .img-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-slot-empty { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--txt-faint); font-size: 11px; text-align: center; padding: 6px; }
+  .img-slot-empty svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .img-slot-remove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; border: none; font-size: 13px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .img-slot-remove:hover { background: rgba(0,0,0,0.8); }
+  .img-slots-actions { display: flex; justify-content: flex-end; gap: 8px; }
   .char-count { font-size: 11px; color: var(--txt-faint); text-align: right; margin-top: 4px; }
 
   /* Image de couverture */
@@ -627,33 +710,67 @@
 <div class="modal-overlay" id="articleModal">
   <div class="modal modal-large">
     <div class="modal-head modal-head-article">
-      <h2 id="modalTitle">Nouvelle publication</h2>
+      <div class="modal-head-article-top">
+        <h2 id="modalTitle">Nouvelle publication</h2>
+        <button class="modal-close" onclick="closeArticleModal()">×</button>
+      </div>
       <div class="editor-toolbar editor-toolbar-head">
-        <select class="editor-select editor-select-dark" title="Police" onchange="insertFormat('fontName', this.value); this.selectedIndex=0">
-          <option value="">Police</option>
-          <option value="Inter" style="font-family:Inter">Inter (défaut)</option>
-          <option value="'DM Serif Display', serif" style="font-family:'DM Serif Display',serif">DM Serif Display</option>
-          <option value="Georgia, serif" style="font-family:Georgia,serif">Georgia</option>
-          <option value="'Times New Roman', serif" style="font-family:'Times New Roman',serif">Times New Roman</option>
-          <option value="Arial, sans-serif" style="font-family:Arial,sans-serif">Arial</option>
-          <option value="'JetBrains Mono', monospace" style="font-family:'JetBrains Mono',monospace">Monospace</option>
-        </select>
-        <select class="editor-select editor-select-dark" title="Taille du texte" onchange="insertFormat('fontSize', this.value); this.selectedIndex=0">
-          <option value="">Taille</option>
-          <option value="1">Très petit</option>
-          <option value="2">Petit</option>
-          <option value="3">Normal</option>
-          <option value="4">Moyen</option>
-          <option value="5">Grand</option>
-          <option value="6">Très grand</option>
-          <option value="7">Énorme</option>
-        </select>
+        <!-- Police -->
+        <div class="editor-dd-wrap">
+          <button type="button" class="editor-btn editor-btn-dark editor-dd-trigger" title="Police" onclick="toggleEditorDD('ddFont',event)">𝐹</button>
+          <div class="editor-dd" id="ddFont">
+            <button onclick="applyEditorDD('fontName','Inter');closeEditorDD('ddFont')" style="font-family:Inter">Inter</button>
+            <button onclick="applyEditorDD('fontName',&quot;'DM Serif Display',serif&quot;);closeEditorDD('ddFont')" style="font-family:'DM Serif Display',serif">DM Serif</button>
+            <button onclick="applyEditorDD('fontName','Georgia,serif');closeEditorDD('ddFont')" style="font-family:Georgia,serif">Georgia</button>
+            <button onclick="applyEditorDD('fontName',&quot;'Times New Roman',serif&quot;);closeEditorDD('ddFont')" style="font-family:'Times New Roman',serif">Times New Roman</button>
+            <button onclick="applyEditorDD('fontName','Arial,sans-serif');closeEditorDD('ddFont')" style="font-family:Arial,sans-serif">Arial</button>
+            <button onclick="applyEditorDD('fontName',&quot;'JetBrains Mono',monospace&quot;);closeEditorDD('ddFont')" style="font-family:'JetBrains Mono',monospace">Monospace</button>
+          </div>
+        </div>
+        <!-- Taille -->
+        <div class="editor-dd-wrap">
+          <button type="button" class="editor-btn editor-btn-dark editor-dd-trigger" title="Taille du texte" onclick="toggleEditorDD('ddSize',event)">T↕</button>
+          <div class="editor-dd" id="ddSize">
+            <button onclick="applyEditorDD('fontSize','1');closeEditorDD('ddSize')" style="font-size:10px">Très petit</button>
+            <button onclick="applyEditorDD('fontSize','2');closeEditorDD('ddSize')" style="font-size:11px">Petit</button>
+            <button onclick="applyEditorDD('fontSize','3');closeEditorDD('ddSize')" style="font-size:13px">Normal</button>
+            <button onclick="applyEditorDD('fontSize','4');closeEditorDD('ddSize')" style="font-size:15px">Moyen</button>
+            <button onclick="applyEditorDD('fontSize','5');closeEditorDD('ddSize')" style="font-size:17px">Grand</button>
+            <button onclick="applyEditorDD('fontSize','6');closeEditorDD('ddSize')" style="font-size:19px">Très grand</button>
+            <button onclick="applyEditorDD('fontSize','7');closeEditorDD('ddSize')" style="font-size:22px">Énorme</button>
+          </div>
+        </div>
+        <!-- Interligne -->
+        <div class="editor-dd-wrap">
+          <button type="button" class="editor-btn editor-btn-dark editor-dd-trigger" title="Interligne" onclick="toggleEditorDD('ddLine',event)">↕</button>
+          <div class="editor-dd" id="ddLine">
+            <button onclick="applyEditorDD('lineHeight','1');closeEditorDD('ddLine')">1.0</button>
+            <button onclick="applyEditorDD('lineHeight','1.15');closeEditorDD('ddLine')">1.15</button>
+            <button onclick="applyEditorDD('lineHeight','1.5');closeEditorDD('ddLine')">1.5</button>
+            <button onclick="applyEditorDD('lineHeight','1.85');closeEditorDD('ddLine')">1.85 ✓</button>
+            <button onclick="applyEditorDD('lineHeight','2');closeEditorDD('ddLine')">2.0</button>
+            <button onclick="applyEditorDD('lineHeight','2.5');closeEditorDD('ddLine')">2.5</button>
+          </div>
+        </div>
+        <!-- Espace para -->
+        <div class="editor-dd-wrap">
+          <button type="button" class="editor-btn editor-btn-dark editor-dd-trigger" title="Espace entre paragraphes" onclick="toggleEditorDD('ddPara',event)">¶↕</button>
+          <div class="editor-dd" id="ddPara">
+            <button onclick="applyEditorDD('paraSpacing','0');closeEditorDD('ddPara')">Aucun</button>
+            <button onclick="applyEditorDD('paraSpacing','8');closeEditorDD('ddPara')">Petit</button>
+            <button onclick="applyEditorDD('paraSpacing','16');closeEditorDD('ddPara')">Normal ✓</button>
+            <button onclick="applyEditorDD('paraSpacing','24');closeEditorDD('ddPara')">Moyen</button>
+            <button onclick="applyEditorDD('paraSpacing','32');closeEditorDD('ddPara')">Grand</button>
+            <button onclick="applyEditorDD('paraSpacing','48');closeEditorDD('ddPara')">Très grand</button>
+          </div>
+        </div>
         <div class="editor-sep editor-sep-dark"></div>
-        <button type="button" class="editor-btn editor-btn-dark" title="Titre" onclick="insertFormat('formatBlock','H2')">H2</button>
-        <button type="button" class="editor-btn editor-btn-dark" title="Sous-titre" onclick="insertFormat('formatBlock','H3')">H3</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Titre H2" onclick="insertFormat('formatBlock','H2')">H2</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Sous-titre H3" onclick="insertFormat('formatBlock','H3')">H3</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Gras" onclick="insertFormat('bold')"><b>G</b></button>
         <button type="button" class="editor-btn editor-btn-dark" title="Italique" onclick="insertFormat('italic')"><i>I</i></button>
         <button type="button" class="editor-btn editor-btn-dark" title="Souligné" onclick="insertFormat('underline')"><u>S</u></button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Barré" onclick="insertFormat('strikeThrough')"><s>B</s></button>
         <div class="editor-sep editor-sep-dark"></div>
         <div class="color-picker-wrap" id="textColorWrap">
           <button type="button" class="editor-btn editor-btn-dark color-picker-trigger" title="Couleur du texte" onclick="toggleColorMenu('textColorMenu', event)">
@@ -669,16 +786,34 @@
         </div>
         <input type="color" id="fTextColor" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" value="#111111" onchange="applyPickedColor('foreColor', this.value, 'textColorIcon')" />
         <input type="color" id="fHlColor" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" value="#fef3dc" onchange="applyPickedColor('hiliteColor', this.value, 'hlColorIcon', true)" />
-        <button type="button" class="editor-btn editor-btn-dark" title="Effacer la mise en forme" onclick="insertFormat('removeFormat')">⌫ Format</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Effacer la mise en forme" onclick="insertFormat('removeFormat')">⌫</button>
         <div class="editor-sep editor-sep-dark"></div>
-        <button type="button" class="editor-btn editor-btn-dark" title="Citation" onclick="insertFormat('formatBlock','BLOCKQUOTE')">❝ Citation</button>
-        <button type="button" class="editor-btn editor-btn-dark" title="Liste à puces" onclick="insertFormat('insertUnorderedList')">• Liste</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Aligner à gauche" onclick="insertFormat('justifyLeft')">⟸</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Centrer" onclick="insertFormat('justifyCenter')">≡</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Aligner à droite" onclick="insertFormat('justifyRight')">⟹</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Justifier" onclick="insertFormat('justifyFull')">☰</button>
+        <div class="editor-sep editor-sep-dark"></div>
+        <button type="button" class="editor-btn editor-btn-dark" title="Diminuer le retrait" onclick="insertFormat('outdent')">⇤</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Augmenter le retrait" onclick="insertFormat('indent')">⇥</button>
+        <div class="editor-sep editor-sep-dark"></div>
+        <button type="button" class="editor-btn editor-btn-dark" title="Citation" onclick="insertFormat('formatBlock','BLOCKQUOTE')">❝</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Liste à puces" onclick="insertFormat('insertUnorderedList')">•≡</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Liste numérotée" onclick="insertFormat('insertOrderedList')">1≡</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Paragraphe normal" onclick="insertFormat('formatBlock','P')">¶</button>
         <div class="editor-sep editor-sep-dark"></div>
-        <button type="button" class="editor-btn editor-btn-dark" title="Insérer une image" onclick="document.getElementById('fInlineImageInput').click()">🖼 Image</button>
-        <button type="button" class="editor-btn editor-btn-dark" title="Séparateur" onclick="insertFormat('insertHorizontalRule')">— Séparateur</button>
+        <div class="color-picker-wrap" id="bgColorWrap">
+          <button type="button" class="editor-btn editor-btn-dark color-picker-trigger" title="Couleur d'arrière-plan du paragraphe" onclick="toggleColorMenu('bgColorMenu', event)">
+            <span class="editor-color-icon editor-hl-icon" id="bgColorIcon">¶</span>
+          </button>
+          <div class="color-menu" id="bgColorMenu"></div>
+        </div>
+        <input type="color" id="fBgColor" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" value="#fef3dc" onchange="applyPickedColor('hiliteColor', this.value, 'bgColorIcon', true)" />
+        <div class="editor-sep editor-sep-dark"></div>
+        <button type="button" class="editor-btn editor-btn-dark" title="Insérer une image" onclick="openImageLayoutModal()">🖼</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Séparateur horizontal" onclick="insertFormat('insertHorizontalRule')">—</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Annuler" onclick="insertFormat('undo')">↶</button>
+        <button type="button" class="editor-btn editor-btn-dark" title="Rétablir" onclick="insertFormat('redo')">↷</button>
       </div>
-      <button class="modal-close" onclick="closeArticleModal()">×</button>
     </div>
     <div class="modal-body">
       <div class="editor-layout">
@@ -705,11 +840,17 @@
             </div>
             <input type="file" id="fCoverInput" accept="image/*" style="display:none" onchange="handleCoverImageChange(event)" />
           </div>
-          <div class="form-row" style="flex:1; display:flex; flex-direction:column; margin-bottom:0">
+          <div class="form-row" style="flex:1; display:flex; flex-direction:column; margin-bottom:0; position:relative">
             <label class="form-label">Contenu de l'article</label>
             <div class="form-textarea" id="fContent" contenteditable="true" data-placeholder="Rédigez le contenu complet de votre article ici... Sélectionnez du texte puis utilisez les boutons pour mettre en forme, ou insérez des images directement dans le texte."></div>
-            <input type="file" id="fInlineImageInput" accept="image/*" style="display:none" onchange="handleInlineImageChange(event)" />
+            <input type="file" id="fInlineImageInput" accept="image/*" multiple style="display:none" onchange="handleInlineImageChange(event)" />
             <div class="char-count" id="charCount">0 caractères</div>
+            <div class="img-size-toolbar" id="imgSizeToolbar">
+              <button type="button" data-size="small" onclick="setImageSize('small')">Petite</button>
+              <button type="button" data-size="medium" onclick="setImageSize('medium')">Moyenne</button>
+              <button type="button" data-size="large" onclick="setImageSize('large')">Large</button>
+              <button type="button" data-size="full" onclick="setImageSize('full')">Pleine largeur</button>
+            </div>
           </div>
         </div>
         <div class="editor-side">
@@ -781,6 +922,87 @@
     </div>
   </div>
 </div>
+
+<!-- ── IMAGE LAYOUT MODAL ─────────────────────── -->
+<div class="modal-overlay" id="imageLayoutModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <h2 id="imageLayoutTitle">Insérer des images</h2>
+      <button class="modal-close" onclick="closeImageLayoutModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="imageLayoutChoiceView">
+        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Choisissez combien d'images afficher côte à côte. Une fois insérée, cliquez sur une image seule pour ajuster sa taille (petite, moyenne, large, pleine largeur).</p>
+        <div class="img-layout-grid">
+          <button type="button" class="img-layout-opt img-layout-opt-wide" onclick="chooseImageLayout('sized')">
+            <div class="img-layout-preview img-layout-preview-sized">
+              <span class="ils-bar" style="width:100%;opacity:.9"></span>
+              <span class="ils-bar" style="width:75%;opacity:.72"></span>
+              <span class="ils-bar" style="width:50%;opacity:.55"></span>
+              <span class="ils-bar" style="width:33%;opacity:.38"></span>
+            </div>
+            <span class="img-layout-label">1 image – taille au choix</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(1)">
+            <div class="img-layout-preview"><span></span></div>
+            <span class="img-layout-label">1 image</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(2)">
+            <div class="img-layout-preview"><span></span><span></span></div>
+            <span class="img-layout-label">2 côte à côte</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(3)">
+            <div class="img-layout-preview"><span></span><span></span><span></span></div>
+            <span class="img-layout-label">3 côte à côte</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout('text-left')">
+            <div class="img-layout-preview"><span></span><span class="img-layout-text"></span></div>
+            <span class="img-layout-label">Image + texte</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout('text-right')">
+            <div class="img-layout-preview"><span class="img-layout-text"></span><span></span></div>
+            <span class="img-layout-label">Texte + image</span>
+          </button>
+        </div>
+
+        <!-- Vue "taille personnalisée" -->
+        <div id="imageLayoutSizeView" style="display:none">
+          <p style="font-size:13px;color:var(--txt-muted);margin-bottom:16px">Choisissez la largeur de votre image. Elle sera insérée centrée dans l'article.</p>
+          <div class="img-size-choice-grid">
+            <button type="button" class="img-size-choice-opt" onclick="chooseSizedImageLayout('img-size-full')">
+              <div class="img-size-choice-bar-wrap"><div class="img-size-choice-bar" style="width:100%"></div></div>
+              <div class="img-size-choice-labels"><span class="img-size-choice-name">Pleine largeur</span><span class="img-size-choice-pct">100 %</span></div>
+            </button>
+            <button type="button" class="img-size-choice-opt" onclick="chooseSizedImageLayout('img-size-large')">
+              <div class="img-size-choice-bar-wrap"><div class="img-size-choice-bar" style="width:75%"></div></div>
+              <div class="img-size-choice-labels"><span class="img-size-choice-name">Large</span><span class="img-size-choice-pct">75 %</span></div>
+            </button>
+            <button type="button" class="img-size-choice-opt" onclick="chooseSizedImageLayout('img-size-medium')">
+              <div class="img-size-choice-bar-wrap"><div class="img-size-choice-bar" style="width:50%"></div></div>
+              <div class="img-size-choice-labels"><span class="img-size-choice-name">Moyenne</span><span class="img-size-choice-pct">50 %</span></div>
+            </button>
+            <button type="button" class="img-size-choice-opt" onclick="chooseSizedImageLayout('img-size-small')">
+              <div class="img-size-choice-bar-wrap"><div class="img-size-choice-bar" style="width:33%"></div></div>
+              <div class="img-size-choice-labels"><span class="img-size-choice-name">Petite</span><span class="img-size-choice-pct">33 %</span></div>
+            </button>
+          </div>
+          <div style="margin-top:14px">
+            <button type="button" class="btn btn-ghost" onclick="backToImageLayoutChoice()">← Retour</button>
+          </div>
+        </div>
+      </div>
+      <div id="imageLayoutSlotsView" style="display:none">
+        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Cliquez sur chaque emplacement à remplir. Laissez vide les emplacements que vous ne voulez pas utiliser (ex: pour centrer une seule image).</p>
+        <div class="img-slots-row" id="imageSlotsRow"></div>
+        <div class="img-slots-actions">
+          <button type="button" class="btn btn-ghost" onclick="backToImageLayoutChoice()">← Retour</button>
+          <button type="button" class="btn btn-primary" onclick="confirmImageSlots()">Insérer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ── TOAST ─────────────────────────────────── -->
 <div class="toast" id="toast">
@@ -1394,6 +1616,7 @@ function openEditModal(id, e) {
   document.getElementById('fNewPageName').value = '';
   document.getElementById('fFeatured').checked = !!a.featured;
   document.getElementById('fContent').innerHTML = a.content || '';
+  updateGhostPlaceholders();
   savedEditorRange = null;
   currentCoverImage = a.coverImage || '';
   document.getElementById('fCoverInput').value = '';
@@ -1417,6 +1640,7 @@ function switchEditorPage(newTag) {
   // Charger le contenu de la nouvelle page (ou page principale)
   currentPageTag = newTag;
   document.getElementById('fContent').innerHTML = editingPages[newTag] || '';
+  updateGhostPlaceholders();
   savedEditorRange = null;
   updateCharCount();
 }
@@ -1463,9 +1687,24 @@ function frDateToISO(fr) {
   return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
+// Nettoie le HTML avant sauvegarde : retire les paragraphes "placeholder fantôme" vides
+// (laissés tels quels dans les blocs image+texte non remplis par l'utilisateur).
+function sanitizeEditorContent(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('p[data-placeholder]').forEach(p => {
+    if ((p.textContent || '').trim() === '') {
+      p.removeAttribute('data-placeholder');
+      p.classList.remove('ghost-empty');
+      if (!p.className) p.removeAttribute('class');
+    }
+  });
+  return tmp.innerHTML;
+}
+
 async function saveArticle() {
   // Capturer le contenu de la page en cours d'édition
-  editingPages[currentPageTag] = document.getElementById('fContent').innerHTML.trim();
+  editingPages[currentPageTag] = sanitizeEditorContent(document.getElementById('fContent').innerHTML.trim());
 
   const title = document.getElementById('fTitle').value.trim();
   const excerpt = document.getElementById('fExcerpt').value.trim();
@@ -1781,6 +2020,82 @@ function insertFormat(command, value) {
   updateCharCount();
 }
 
+// ── INTERLIGNE & ESPACEMENT ENTRE PARAGRAPHES ─
+// Récupère les blocs (paragraphes/titres/listes/citations) couverts par la sélection.
+// Si rien n'est sélectionné, applique à tout l'éditeur.
+function getSelectedBlocks() {
+  const editor = document.getElementById('fContent');
+  const blockSelector = 'p,h1,h2,h3,h4,h5,h6,li,blockquote,div';
+  restoreEditorSelection();
+  const sel = window.getSelection();
+  let blocks = [];
+
+  if (sel && sel.rangeCount && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const all = editor.querySelectorAll(blockSelector);
+    all.forEach(el => {
+      if (range.intersectsNode(el)) blocks.push(el);
+    });
+    // Ne garder que les blocs "feuilles" pertinents (éviter doublons parent/enfant)
+    blocks = blocks.filter(el => !blocks.some(other => other !== el && other.contains(el)));
+  }
+
+  if (!blocks.length) {
+    // Pas de sélection significative : appliquer à tous les blocs de l'éditeur
+    blocks = Array.from(editor.querySelectorAll(blockSelector));
+    if (!blocks.length) blocks = [editor];
+  }
+
+  return blocks;
+}
+
+// ── COMPACT DROPDOWNS (Police / Taille / Interligne / Espace para) ──
+function toggleEditorDD(id, e) {
+  if (e) e.stopPropagation();
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.editor-dd.open').forEach(d => d.classList.remove('open'));
+  if (!isOpen) {
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    el.style.top = (rect.bottom + 4) + 'px';
+    el.style.left = rect.left + 'px';
+    el.classList.add('open');
+  }
+}
+function closeEditorDD(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.editor-dd-wrap')) {
+    document.querySelectorAll('.editor-dd.open').forEach(d => d.classList.remove('open'));
+  }
+});
+function applyEditorDD(cmd, value) {
+  restoreEditorSelection();
+  if (cmd === 'lineHeight') { applyLineHeight(value); return; }
+  if (cmd === 'paraSpacing') { applyParagraphSpacing(value); return; }
+  insertFormat(cmd, value);
+}
+
+
+function applyLineHeight(value) {
+  if (!value) return;
+  const blocks = getSelectedBlocks();
+  blocks.forEach(el => { el.style.lineHeight = value; });
+  saveEditorSelection();
+  updateCharCount();
+}
+
+function applyParagraphSpacing(value) {
+  if (value === '') return;
+  const blocks = getSelectedBlocks();
+  blocks.forEach(el => { el.style.marginBottom = value + 'px'; });
+  saveEditorSelection();
+  updateCharCount();
+}
+
 // ── SÉLECTEUR DE COULEURS (style Word) ────────
 const THEME_COLOR_ROWS = [
   ['#FFFFFF','#000000','#A6A6A6','#5B7DA8','#ED7D31','#FFC000','#FFD966','#70AD47','#4472C4','#264478'],
@@ -1809,13 +2124,21 @@ function buildColorMenu(menuId, kind) {
     });
     html += `</div>`;
     html += `<div class="color-menu-more" onclick="openNativeColorPicker('fTextColor')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Plus de couleurs…</div>`;
-  } else {
+  } else if (kind === 'hl') {
     html += `<div class="color-menu-label">Couleurs de surlignage</div><div class="color-grid">`;
     HL_COLORS.forEach(c => {
       html += `<button type="button" class="color-swatch" style="background:${c}" title="${c}" onclick="applyPickedColor('hiliteColor','${c}','hlColorIcon',true)"></button>`;
     });
     html += `</div>`;
     html += `<div class="color-menu-more" onclick="openNativeColorPicker('fHlColor')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Plus de couleurs…</div>`;
+  } else {
+    html += `<div class="color-menu-label">Arrière-plan du paragraphe</div><div class="color-grid">`;
+    HL_COLORS.forEach(c => {
+      html += `<button type="button" class="color-swatch" style="background:${c}" title="${c}" onclick="applyPickedColor('hiliteColor','${c}','bgColorIcon',true)"></button>`;
+    });
+    html += `<button type="button" class="color-swatch" style="background:transparent;border:1px dashed rgba(255,255,255,0.4)" title="Aucune" onclick="applyPickedColor('hiliteColor','transparent','bgColorIcon',true)"></button>`;
+    html += `</div>`;
+    html += `<div class="color-menu-more" onclick="openNativeColorPicker('fBgColor')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Plus de couleurs…</div>`;
   }
   menu.innerHTML = html;
 }
@@ -1828,7 +2151,7 @@ function toggleColorMenu(menuId, e) {
   });
   const menu = document.getElementById(menuId);
   if (!menu.dataset.built) {
-    buildColorMenu(menuId, menuId === 'textColorMenu' ? 'text' : 'hl');
+    buildColorMenu(menuId, menuId === 'textColorMenu' ? 'text' : (menuId === 'hlColorMenu' ? 'hl' : 'bg'));
     menu.dataset.built = '1';
   }
   menu.classList.toggle('open');
@@ -1900,27 +2223,309 @@ function renderCoverPreview() {
 }
 
 // ── IMAGES : DANS LE CONTENU ───────────────────
+// ── IMAGES : INSERTION CÔTE À CÔTE ────────────
+let pendingImageLayout = 1;
+let pendingImageSizeClass = 'img-size-full';
+let imageSlots = []; // { dataUrl: string|null } pour les layouts à 2/3 colonnes
+let activeSlotIndex = null;
+
+function openImageLayoutModal() {
+  saveEditorSelection();
+  backToImageLayoutChoice();
+  document.getElementById('imageLayoutModal').classList.add('open');
+}
+
+function closeImageLayoutModal() {
+  document.getElementById('imageLayoutModal').classList.remove('open');
+  backToImageLayoutChoice();
+}
+
+function backToImageLayoutChoice() {
+  document.getElementById('imageLayoutChoiceView').style.display = '';
+  document.getElementById('imageLayoutChoiceView').querySelector('.img-layout-grid').style.display = '';
+  if (document.getElementById('imageLayoutSizeView')) document.getElementById('imageLayoutSizeView').style.display = 'none';
+  document.getElementById('imageLayoutSlotsView').style.display = 'none';
+  document.getElementById('imageLayoutTitle').textContent = 'Insérer des images';
+}
+
+function chooseImageLayout(layout) {
+  pendingImageLayout = layout;
+  if (layout === 'sized') {
+    // Show size picker sub-view
+    document.getElementById('imageLayoutChoiceView').querySelector('.img-layout-grid').style.display = 'none';
+    document.getElementById('imageLayoutSizeView').style.display = '';
+    document.getElementById('imageLayoutTitle').textContent = '1 image – taille au choix';
+    return;
+  }
+  if (layout === 2 || layout === 3) {
+    // Passer à la vue "slots" : upload individuel et optionnel par emplacement
+    imageSlots = Array.from({ length: layout }, () => ({ dataUrl: null }));
+    document.getElementById('imageLayoutChoiceView').style.display = 'none';
+    document.getElementById('imageLayoutSlotsView').style.display = '';
+    document.getElementById('imageLayoutTitle').textContent = layout + ' images côte à côte';
+    renderImageSlots();
+    return;
+  }
+  closeImageLayoutModal();
+  const input = document.getElementById('fInlineImageInput');
+  input.removeAttribute('multiple');
+  input.click();
+}
+
+function chooseSizedImageLayout(sizeClass) {
+  pendingImageLayout = 1;
+  pendingImageSizeClass = sizeClass;
+  closeImageLayoutModal();
+  const input = document.getElementById('fInlineImageInput');
+  input.removeAttribute('multiple');
+  input.click();
+}
+
+// ── Vue "slots" pour layouts 2/3 colonnes ──────
+function renderImageSlots() {
+  const row = document.getElementById('imageSlotsRow');
+  row.innerHTML = imageSlots.map((slot, i) => {
+    if (slot.dataUrl) {
+      return `<div class="img-slot filled">
+        <img src="${slot.dataUrl}" alt="" />
+        <button type="button" class="img-slot-remove" title="Retirer" onclick="removeImageSlot(${i}, event)">×</button>
+      </div>`;
+    }
+    return `<div class="img-slot" onclick="pickImageForSlot(${i})">
+      <div class="img-slot-empty">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>Choisir une image</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pickImageForSlot(index) {
+  activeSlotIndex = index;
+  const input = document.getElementById('fInlineImageInput');
+  input.removeAttribute('multiple');
+  input.click();
+}
+
+function removeImageSlot(index, e) {
+  if (e) e.stopPropagation();
+  imageSlots[index].dataUrl = null;
+  renderImageSlots();
+}
+
+function confirmImageSlots() {
+  const filled = imageSlots.filter(s => s.dataUrl);
+  if (!filled.length) { showToast('Choisissez au moins une image.', 'error'); return; }
+  restoreEditorSelection();
+  const cells = imageSlots.map(s => s.dataUrl
+    ? `<img src="${s.dataUrl}" alt="" />`
+    : `<div class="img-row-spacer"></div>`
+  ).join('');
+  const html = `<div class="img-row" contenteditable="false">${cells}</div><p><br></p>`;
+  insertHtmlInEditor(html);
+  closeImageLayoutModal();
+}
+
+function insertHtmlInEditor(html) {
+  try {
+    document.execCommand('insertHTML', false, html);
+  } catch (err) {
+    document.getElementById('fContent').innerHTML += html;
+  }
+  saveEditorSelection();
+  updateCharCount();
+}
+
 function handleInlineImageChange(e) {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); return; }
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  const file = files[0];
+  if (!file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); e.target.value = ''; return; }
+
   const reader = new FileReader();
   reader.onload = ev => {
-    restoreEditorSelection();
-    const img = `<img src="${ev.target.result}" alt="" />`;
-    try {
-      document.execCommand('insertHTML', false, img);
-    } catch (err) {
-      document.getElementById('fContent').innerHTML += img;
+    const dataUrl = ev.target.result;
+
+    // Cas : upload pour un emplacement spécifique (layout 2/3 colonnes)
+    if (activeSlotIndex !== null) {
+      imageSlots[activeSlotIndex].dataUrl = dataUrl;
+      activeSlotIndex = null;
+      renderImageSlots();
+      e.target.value = '';
+      return;
     }
-    saveEditorSelection();
-    updateCharCount();
+
+    // Cas : layouts simples (1 image, image+texte)
+    const layout = pendingImageLayout;
+    let html;
+    if (layout === 'text-left' || layout === 'text-right') {
+      const media = `<div class="img-text-media" contenteditable="false"><img src="${dataUrl}" alt="" /></div>`;
+      const content = `<div class="img-text-content"><p class="ghost-empty" data-placeholder="Votre texte ici… (Entrée sur une ligne vide pour reprendre en pleine largeur)"><br></p></div>`;
+      const inner = layout === 'text-left' ? media + content : content + media;
+      html = `<div class="img-text-row">${inner}</div><p><br></p>`;
+    } else {
+      const sizeClass = pendingImageSizeClass || 'img-size-full';
+      html = `<img src="${dataUrl}" alt="" class="${sizeClass}" />`;
+      pendingImageSizeClass = 'img-size-full'; // reset
+    }
+    insertHtmlInEditor(html);
+    pendingImageLayout = 1;
+    updateGhostPlaceholders();
   };
   reader.readAsDataURL(file);
   e.target.value = '';
 }
 
-// ── CLOSE ON OVERLAY CLICK ────────────────────
+
+// ── REDIMENSIONNEMENT DES IMAGES SIMPLES ──────
+// Clic sur une image autonome (hors .img-row / .img-text-row) :
+// affiche une mini barre pour choisir sa taille, centrée.
+let selectedResizableImg = null;
+const IMG_SIZE_CLASSES = ['img-size-small', 'img-size-medium', 'img-size-large', 'img-size-full'];
+
+function isResizableImage(img) {
+  return img.tagName === 'IMG' && !img.closest('.img-row') && !img.closest('.img-text-media');
+}
+
+document.getElementById('fContent').addEventListener('click', function(e) {
+  const img = e.target.closest('img');
+  if (img && isResizableImage(img)) {
+    selectImageForResize(img);
+  } else {
+    deselectResizableImage();
+  }
+});
+
+function selectImageForResize(img) {
+  if (selectedResizableImg) selectedResizableImg.classList.remove('editor-img-selected');
+  selectedResizableImg = img;
+  img.classList.add('editor-img-selected');
+
+  const toolbar = document.getElementById('imgSizeToolbar');
+  const container = document.getElementById('fContent');
+  const imgRect = img.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+
+  toolbar.style.top = (img.offsetTop) + 'px';
+  toolbar.style.left = Math.max(0, (imgRect.left - containerRect.left)) + 'px';
+  toolbar.classList.add('open');
+
+  const currentSize = IMG_SIZE_CLASSES.find(c => img.classList.contains(c)) || 'img-size-full';
+  toolbar.querySelectorAll('button').forEach(btn => {
+    btn.classList.toggle('active', 'img-size-' + btn.dataset.size === currentSize);
+  });
+}
+
+function deselectResizableImage() {
+  if (selectedResizableImg) selectedResizableImg.classList.remove('editor-img-selected');
+  selectedResizableImg = null;
+  document.getElementById('imgSizeToolbar').classList.remove('open');
+}
+
+function setImageSize(size) {
+  if (!selectedResizableImg) return;
+  IMG_SIZE_CLASSES.forEach(c => selectedResizableImg.classList.remove(c));
+  selectedResizableImg.classList.add('img-size-' + size);
+  document.getElementById('imgSizeToolbar').querySelectorAll('button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.size === size);
+  });
+  updateCharCount();
+}
+
+// Fermer la barre si on clique en dehors de l'éditeur
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#fContent') && !e.target.closest('#imgSizeToolbar')) {
+    deselectResizableImage();
+  }
+});
+
+
+// Affiche/masque le texte indicatif selon que le paragraphe est vide ou non.
+function updateGhostPlaceholders() {
+  document.querySelectorAll('#fContent .img-text-content p[data-placeholder]').forEach(p => {
+    const empty = (p.textContent || '').trim() === '';
+    p.classList.toggle('ghost-empty', empty);
+  });
+}
+
+document.getElementById('fContent').addEventListener('input', updateGhostPlaceholders);
+
+// ── COLLER UNE IMAGE (Ctrl+V) ─────────────────
+document.getElementById('fContent').addEventListener('paste', function(e) {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+
+  let imageFile = null;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type && items[i].type.startsWith('image/')) {
+      imageFile = items[i].getAsFile();
+      break;
+    }
+  }
+  if (!imageFile) return; // pas d'image : laisser le collage de texte normal se faire
+
+  e.preventDefault();
+  saveEditorSelection();
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    restoreEditorSelection();
+
+    if (activeSlotIndex !== null) {
+      imageSlots[activeSlotIndex].dataUrl = dataUrl;
+      activeSlotIndex = null;
+      renderImageSlots();
+      return;
+    }
+
+    const html = `<img src="${dataUrl}" alt="" class="img-size-full" />`;
+    insertHtmlInEditor(html);
+    updateGhostPlaceholders();
+  };
+  reader.readAsDataURL(imageFile);
+});
+
+
+// Quand on est dans .img-text-content et qu'on appuie sur Entrée
+// sur une ligne vide, on sort du bloc image+texte pour continuer
+// la rédaction en pleine largeur juste après.
+document.getElementById('fContent').addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  let node = sel.getRangeAt(0).startContainer;
+  const content = node.nodeType === 1 ? node.closest?.('.img-text-content') : node.parentElement?.closest('.img-text-content');
+  if (!content) return;
+
+  // Détermine le paragraphe courant à l'intérieur de .img-text-content
+  let para = node.nodeType === 1 ? node : node.parentElement;
+  while (para && para.parentElement !== content) para = para.parentElement;
+  if (!para) return;
+
+  const isEmpty = (para.textContent || '').trim() === '' && !para.querySelector('img');
+  const isLast = para === content.lastElementChild;
+
+  if (isEmpty && isLast) {
+    e.preventDefault();
+    const row = content.closest('.img-text-row');
+    if (!row) return;
+    const newPara = document.createElement('p');
+    newPara.innerHTML = '<br>';
+    row.insertAdjacentElement('afterend', newPara);
+
+    // Si la ligne vide était la seule/dernière, on la retire pour éviter le doublon
+    if (content.children.length > 1) para.remove();
+
+    const range = document.createRange();
+    range.setStart(newPara, 0);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    saveEditorSelection();
+  }
+});
+
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
