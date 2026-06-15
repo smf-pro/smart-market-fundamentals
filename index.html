@@ -638,15 +638,23 @@
           <option value="Arial, sans-serif" style="font-family:Arial,sans-serif">Arial</option>
           <option value="'JetBrains Mono', monospace" style="font-family:'JetBrains Mono',monospace">Monospace</option>
         </select>
-        <select class="editor-select editor-select-dark" title="Taille du texte" onchange="insertFormat('fontSize', this.value); this.selectedIndex=0">
+        <select class="editor-select editor-select-dark" title="Taille du texte" onchange="setFontSizePt(this.value); this.selectedIndex=0">
           <option value="">Taille</option>
-          <option value="1">Très petit</option>
-          <option value="2">Petit</option>
-          <option value="3">Normal</option>
-          <option value="4">Moyen</option>
-          <option value="5">Grand</option>
-          <option value="6">Très grand</option>
-          <option value="7">Énorme</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="14">14</option>
+          <option value="16">16</option>
+          <option value="18">18</option>
+          <option value="20">20</option>
+          <option value="24">24</option>
+          <option value="28">28</option>
+          <option value="32">32</option>
+          <option value="36">36</option>
+          <option value="48">48</option>
+          <option value="72">72</option>
         </select>
         <div class="editor-sep editor-sep-dark"></div>
         <button type="button" class="editor-btn editor-btn-dark" title="Titre" onclick="insertFormat('formatBlock','H2')">H2</button>
@@ -738,10 +746,14 @@
             <label class="form-label">Page / Tag secondaire (optionnel)</label>
             <select class="form-select" id="fTag2" onchange="switchEditorPage(this.value)">
               <option value="">— Page principale —</option>
-              <option value="green|Forex">Forex</option>
-              <option value="amber|Commodités">Commodités</option>
-              <option value="navy|Cryptomonnaies">Cryptomonnaies</option>
-              <option value="blue|Trades">Trades</option>
+              <option value="green|USD">USD</option>
+              <option value="red|CAD">CAD</option>
+              <option value="blue|EUR">EUR</option>
+              <option value="navy|GBP">GBP</option>
+              <option value="amber|CHF">CHF</option>
+              <option value="green|JPY">JPY</option>
+              <option value="red|AUD">AUD</option>
+              <option value="blue|NZD">NZD</option>
             </select>
             <div style="font-size:11px;color:var(--txt-faint);margin-top:6px">Le titre, le sous-titre et l'image restent identiques. Seul le contenu change selon la page (tag) sélectionnée.</div>
             <div style="display:flex;gap:6px;margin-top:10px">
@@ -1329,10 +1341,14 @@ function resetTag2Options() {
   const select = document.getElementById('fTag2');
   select.innerHTML = `
     <option value="">— Page principale —</option>
-    <option value="green|Forex">Forex</option>
-    <option value="navy|Central Banks">Central Banks</option>
-    <option value="blue|Trades">Trades</option>
-    <option value="amber|Autre">Autre</option>`;
+    <option value="green|USD">USD</option>
+    <option value="red|CAD">CAD</option>
+    <option value="blue|EUR">EUR</option>
+    <option value="navy|GBP">GBP</option>
+    <option value="amber|CHF">CHF</option>
+    <option value="green|JPY">JPY</option>
+    <option value="red|AUD">AUD</option>
+    <option value="blue|NZD">NZD</option>`;
 }
 
 function addPageOptionsFromPages(pages) {
@@ -1773,6 +1789,26 @@ function insertFormat(command, value) {
   restoreEditorSelection();
   try {
     document.execCommand(command, false, value || null);
+  } catch (e) {}
+  saveEditorSelection();
+  updateCharCount();
+}
+
+// Applique une taille de police en points (pt), comme dans Word.
+// Astuce : execCommand('fontSize') ne supporte que 1-7, on utilise donc
+// la valeur 7 comme marqueur temporaire puis on la remplace par du CSS en pt.
+function setFontSizePt(pt) {
+  if (!pt) return;
+  restoreEditorSelection();
+  try {
+    document.execCommand('fontSize', false, '7');
+    const editor = document.getElementById('fContent');
+    if (editor) {
+      editor.querySelectorAll('font[size="7"]').forEach(el => {
+        el.removeAttribute('size');
+        el.style.fontSize = pt + 'pt';
+      });
+    }
   } catch (e) {}
   saveEditorSelection();
   updateCharCount();
