@@ -289,7 +289,7 @@
   .back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--txt-muted); cursor: pointer; margin-bottom: 28px; padding: 7px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); transition: all 0.12s; }
   .back-btn:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-lt); }
   .art-page-header { margin-bottom: 32px; }
-  .art-page-tabs { display: flex; gap: 6px; margin-top: -32px; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 0; padding-top: 4px; position: sticky; top: 56px; z-index: 50; background: var(--bg); }
+  .art-page-tabs { display: flex; gap: 6px; margin-top: -32px; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 0; padding-top: 4px; position: sticky; top: 56px; z-index: 50; background: var(--bg); justify-content: center; }
   .art-page-tab { font-size: 13px; font-weight: 500; padding: 8px 18px; border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; background: var(--bg); color: var(--txt-muted); cursor: pointer; transition: all 0.12s; margin-bottom: -1px; }
   .art-page-tab:hover { color: var(--blue); background: var(--blue-lt); }
   .art-page-tab.active { background: var(--surface); color: var(--navy); border-color: var(--border); border-bottom: 2px solid var(--surface); font-weight: 600; }
@@ -330,7 +330,7 @@
   .modal-head-article { flex-wrap: wrap; gap: 0; padding: 0; overflow: visible; }
   .modal-head-article-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; width: 100%; }
   .modal-head-article h2 { flex-shrink: 0; font-size: 15px; }
-  .editor-toolbar-head { width: 100%; background: rgba(255,255,255,0.06); border: none; border-top: 1px solid rgba(255,255,255,0.12); padding: 7px 12px; flex-wrap: nowrap; overflow: visible; scrollbar-width: none; }
+  .editor-toolbar-head { width: 100%; background: rgba(255,255,255,0.06); border: none; border-top: 1px solid rgba(255,255,255,0.12); padding: 7px 12px; flex-wrap: nowrap; overflow: visible; scrollbar-width: none; justify-content: center; }
   .editor-select-dark { background: rgba(255,255,255,0.08); color: #C8DAEF; border-color: rgba(255,255,255,0.15); }
   .editor-select-dark:hover { border-color: #5DD99B; color: #5DD99B; }
   .editor-select-dark option { color: #111; }
@@ -782,8 +782,6 @@
           </div>
         </div>
         <div class="editor-sep editor-sep-dark"></div>
-        <button type="button" class="editor-btn editor-btn-dark" title="Titre H2" onclick="insertFormat('formatBlock','H2')">H2</button>
-        <button type="button" class="editor-btn editor-btn-dark" title="Sous-titre H3" onclick="insertFormat('formatBlock','H3')">H3</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Gras" onclick="insertFormat('bold')"><b>G</b></button>
         <button type="button" class="editor-btn editor-btn-dark" title="Italique" onclick="insertFormat('italic')"><i>I</i></button>
         <button type="button" class="editor-btn editor-btn-dark" title="Souligné" onclick="insertFormat('underline')"><u>S</u></button>
@@ -810,21 +808,9 @@
         <button type="button" class="editor-btn editor-btn-dark" title="Aligner à droite" onclick="insertFormat('justifyRight')">⟹</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Justifier" onclick="insertFormat('justifyFull')">☰</button>
         <div class="editor-sep editor-sep-dark"></div>
-        <button type="button" class="editor-btn editor-btn-dark" title="Diminuer le retrait" onclick="insertFormat('outdent')">⇤</button>
-        <button type="button" class="editor-btn editor-btn-dark" title="Augmenter le retrait" onclick="insertFormat('indent')">⇥</button>
-        <div class="editor-sep editor-sep-dark"></div>
         <button type="button" class="editor-btn editor-btn-dark" title="Citation" onclick="insertFormat('formatBlock','BLOCKQUOTE')">❝</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Liste à puces" onclick="insertFormat('insertUnorderedList')">•≡</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Liste numérotée" onclick="insertFormat('insertOrderedList')">1≡</button>
-        <button type="button" class="editor-btn editor-btn-dark" title="Paragraphe normal" onclick="insertFormat('formatBlock','P')">¶</button>
-        <div class="editor-sep editor-sep-dark"></div>
-        <div class="color-picker-wrap" id="bgColorWrap">
-          <button type="button" class="editor-btn editor-btn-dark color-picker-trigger" title="Couleur d'arrière-plan du paragraphe" onclick="toggleColorMenu('bgColorMenu', event)">
-            <span class="editor-color-icon editor-hl-icon" id="bgColorIcon">¶</span>
-          </button>
-          <div class="color-menu" id="bgColorMenu"></div>
-        </div>
-        <input type="color" id="fBgColor" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" value="#fef3dc" onchange="applyPickedColor('hiliteColor', this.value, 'bgColorIcon', true)" />
         <div class="editor-sep editor-sep-dark"></div>
         <button type="button" class="editor-btn editor-btn-dark" title="Insérer une image" onclick="openImageLayoutModal()">🖼</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Séparateur horizontal (texte optionnel)" onclick="insertSeparator()">—</button>
@@ -891,6 +877,7 @@
             <label class="form-label">Page / Tag secondaire (optionnel)</label>
             <select class="form-select" id="fTag2" onchange="switchEditorPage(this.value)">
               <option value="">— Page principale —</option>
+              <optgroup label="── Devises ──">
               <option value="green|USD">USD</option>
               <option value="red|CAD">CAD</option>
               <option value="blue|EUR">EUR</option>
@@ -899,6 +886,15 @@
               <option value="green|JPY">JPY</option>
               <option value="red|AUD">AUD</option>
               <option value="blue|NZD">NZD</option>
+              </optgroup>
+              <optgroup label="── Jours ──">
+              <option value="navy|LAST WEEK">LAST WEEK</option>
+              <option value="blue|LUNDI">LUNDI</option>
+              <option value="blue|MARDI">MARDI</option>
+              <option value="blue|MERCREDI">MERCREDI</option>
+              <option value="blue|JEUDI">JEUDI</option>
+              <option value="blue|VENDREDI">VENDREDI</option>
+              </optgroup>
             </select>
             <div style="font-size:11px;color:var(--txt-faint);margin-top:6px">Le titre, le sous-titre et l'image restent identiques. Seul le contenu change selon la page (tag) sélectionnée.</div>
             <div style="display:flex;gap:6px;margin-top:10px">
@@ -1592,6 +1588,7 @@ function resetTag2Options() {
   const select = document.getElementById('fTag2');
   select.innerHTML = `
     <option value="">— Page principale —</option>
+    <optgroup label="── Devises ──">
     <option value="green|USD">USD</option>
     <option value="red|CAD">CAD</option>
     <option value="blue|EUR">EUR</option>
@@ -1599,7 +1596,16 @@ function resetTag2Options() {
     <option value="amber|CHF">CHF</option>
     <option value="green|JPY">JPY</option>
     <option value="red|AUD">AUD</option>
-    <option value="blue|NZD">NZD</option>`;
+    <option value="blue|NZD">NZD</option>
+    </optgroup>
+    <optgroup label="── Jours ──">
+    <option value="navy|LAST WEEK">LAST WEEK</option>
+    <option value="blue|LUNDI">LUNDI</option>
+    <option value="blue|MARDI">MARDI</option>
+    <option value="blue|MERCREDI">MERCREDI</option>
+    <option value="blue|JEUDI">JEUDI</option>
+    <option value="blue|VENDREDI">VENDREDI</option>
+    </optgroup>`;
 }
 
 function addPageOptionsFromPages(pages) {
@@ -1949,7 +1955,7 @@ function renderArticlePageContent(id, pageTag) {
     <blockquote>${a.excerpt}</blockquote>`;
 
   // Ordre fixe des pages (même ordre que le sélecteur de l'éditeur)
-  const PAGE_ORDER = ['green|USD','red|CAD','blue|EUR','navy|GBP','amber|CHF','green|JPY','red|AUD','blue|NZD'];
+  const PAGE_ORDER = ['green|USD','red|CAD','blue|EUR','navy|GBP','amber|CHF','green|JPY','red|AUD','blue|NZD','navy|LAST WEEK','blue|LUNDI','blue|MARDI','blue|MERCREDI','blue|JEUDI','blue|VENDREDI'];
   // Onglets : Page principale + une par tag présent dans a.pages (aucun actif par défaut)
   // On exclut la catégorie principale (par valeur exacte ou par label) pour éviter le doublon.
   const mainCatLabel = getCatLabel(a.category).toLowerCase();
