@@ -1313,7 +1313,7 @@ function renderHero() {
         </div>
         <span class="hero-period">${featured.category ? getCatLabel(featured.category) : ''} · 2026</span>`;
   heroEl.innerHTML = `
-    <div class="hero-card" onclick="openArticleNewTab('${featured.id}', event)" style="cursor:pointer">
+    <div class="hero-card" onclick="openArticle('${featured.id}')" style="cursor:pointer">
       <div class="hero-visual${featured.coverImage?' has-cover':''}">
         <span class="hero-badge">Rapport vedette</span>
         ${heroVisualInner}
@@ -1343,7 +1343,7 @@ function renderHero() {
       ${sideArticles.map(a => {
         const sc = getCatColor(a.category);
         const sideIconInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[sc]||THUMB_ICONS.blue);
-        return `<div class="side-card" style="position:relative" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+        return `<div class="side-card" style="position:relative" onclick="openArticle('${a.id}')" style="cursor:pointer">
           <div class="side-icon si-${sc}${a.coverImage?' has-cover':''}">${sideIconInner}</div>
           <div class="side-body">
             <div class="side-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1382,7 +1382,7 @@ function renderArticleList() {
   listEl.innerHTML = list.map(a => {
     const c = getCatColor(a.category);
     const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
-    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+    return `<div class="art-row" onclick="openArticle('${a.id}')" style="cursor:pointer">
       <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
       <div class="art-content">
         <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1412,7 +1412,7 @@ function renderBancCentrale() {
     return;
   }
   el.innerHTML = list.map((a, i) => `
-    <div class="bc-article-row" onclick="openArticleNewTab('${a.id}', event)">
+    <div class="bc-article-row" onclick="openArticle('${a.id}')">
       <span class="bc-article-num">0${i+1}</span>
       <div class="bc-article-body">
         <div class="bc-article-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</div>
@@ -1427,7 +1427,7 @@ function renderTopPicks() {
   const el = document.getElementById('topPicksList');
   if (!el) return;
   el.innerHTML = picks.map((a,i) => `
-    <div class="pick-row">
+    <div class="pick-row" onclick="openArticle('${a.id}')" style="cursor:pointer">
       <span class="pick-num">0${i+1}</span>
       <span class="pick-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</span>
       ${tagHTML(`${colors[i%5]}|${getCatLabel(a.category)}`)}
@@ -1477,7 +1477,7 @@ function handleSearch(query) {
   listEl.innerHTML = results.map(a => {
     const c = getCatColor(a.category);
     const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
-    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+    return `<div class="art-row" onclick="openArticle('${a.id}')" style="cursor:pointer">
       <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
       <div class="art-content">
         <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1763,8 +1763,12 @@ async function saveArticle() {
   const coverImage = currentCoverImage || '';
 
   const pages = {};
+  const mainCat = document.getElementById('fCategory').value;
+  const mainCatLabel = getCatLabel(mainCat).toLowerCase();
   Object.keys(editingPages).forEach(key => {
     if (key === '') return;
+    if (key === mainCat) return; // Ne pas sauvegarder la catégorie principale comme sous-page
+    if (getCatLabel(key).toLowerCase() === mainCatLabel) return; // Aussi filtrer par label seul
     if (editingPages[key]) pages[key] = editingPages[key];
   });
 
@@ -1944,18 +1948,31 @@ function renderArticlePageContent(id, pageTag) {
     <p>Cet article n'a pas encore de contenu détaillé. ${isAdmin ? 'Cliquez sur <strong>Modifier</strong> pour ajouter le contenu complet.' : 'Revenez prochainement pour lire l\'analyse complète.'}</p>
     <blockquote>${a.excerpt}</blockquote>`;
 
+  // Ordre fixe des pages (même ordre que le sélecteur de l'éditeur)
+  const PAGE_ORDER = ['green|USD','red|CAD','blue|EUR','navy|GBP','amber|CHF','green|JPY','red|AUD','blue|NZD'];
   // Onglets : Page principale + une par tag présent dans a.pages (aucun actif par défaut)
-  const pageKeys = Object.keys(a.pages || {});
+  // On exclut la catégorie principale (par valeur exacte ou par label) pour éviter le doublon.
+  const mainCatLabel = getCatLabel(a.category).toLowerCase();
+  const pageKeys = Object.keys(a.pages || {})
+    .filter(k => k !== a.category && getCatLabel(k).toLowerCase() !== mainCatLabel)
+    .sort((a, b) => {
+      const ia = PAGE_ORDER.indexOf(a);
+      const ib = PAGE_ORDER.indexOf(b);
+      // Pages connues d'abord selon l'ordre défini, pages custom à la fin
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
   const tabsHTML = pageKeys.length > 0 ? `
     <div class="art-page-tabs">
-      <button class="art-page-tab" onclick="showArticleSection('${id}','', event)">${getCatLabel(a.category) || 'Principal'}</button>
       ${pageKeys.map(k => `<button class="art-page-tab" onclick="showArticleSection('${id}','${k}', event)">${getCatLabel(k)}</button>`).join('')}
     </div>` : '';
 
   // Toutes les sections (principale + pages additionnelles), toutes visibles par défaut
   const sectionsHTML = `
     <section class="art-page-section" id="art-section-main" data-tag="">
-      ${pageKeys.length > 0 ? `<div class="art-section-label">${getCatLabel(a.category) || 'Principal'}</div>` : ''}
+      ${pageKeys.length > 0 ? `<div class="art-section-label">Principal</div>` : ''}
       <div class="art-page-body">${mainContent}</div>
     </section>
     ${pageKeys.map(k => `
@@ -1995,6 +2012,8 @@ function renderArticlePageContent(id, pageTag) {
 // Affiche uniquement la section choisie et masque les autres.
 function showArticleSection(id, pageTag, e) {
   document.querySelectorAll('.art-page-section').forEach(sec => {
+    // La section principale (data-tag="") reste toujours visible
+    if (sec.dataset.tag === '') { sec.style.display = 'block'; return; }
     sec.style.display = (sec.dataset.tag === pageTag) ? 'block' : 'none';
   });
   document.querySelectorAll('.art-page-tab').forEach(tab => tab.classList.remove('active'));
