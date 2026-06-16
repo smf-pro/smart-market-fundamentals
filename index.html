@@ -500,8 +500,8 @@
   .bc-article-date { font-size: 11px; color: var(--txt-faint); }
 
   /* Image de couverture sur la page article */
-  .art-page-cover { width: 100%; height: 320px; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 28px; background: var(--navy); }
-  .art-page-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .art-page-cover { width: calc(100% - 48px); margin-left: 24px; margin-right: 24px; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 28px; background: var(--navy); }
+  .art-page-cover img { width: 100%; height: auto; display: block; }
 
   /* Couvertures dans les cartes / listes */
   .hero-visual.has-cover { padding: 0; }
@@ -549,7 +549,7 @@
 
     .article-page-wrap { padding: 20px 0 48px; }
     .art-page-title { font-size: 24px; }
-    .art-page-cover { height: 200px; }
+
     .art-page-meta { flex-wrap: wrap; gap: 8px; }
     .article-page-layout { grid-template-columns: 1fr; padding: 16px; }
     .article-page-sidebar { display: none; }
@@ -574,7 +574,7 @@
     .hero-body { padding: 16px; }
     .hero-body h2 { font-size: 18px; }
     .art-page-title { font-size: 20px; }
-    .art-page-cover { height: 160px; }
+
   }
 </style>
 <!-- ── FIREBASE ─────────────────────────────── -->
@@ -2291,8 +2291,19 @@ function handleCoverImageChange(e) {
   if (!file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); return; }
   const reader = new FileReader();
   reader.onload = ev => {
-    currentCoverImage = ev.target.result;
-    renderCoverPreview();
+    const img = new Image();
+    img.onload = () => {
+      // Compression : max 900px de large, qualité 0.75
+      const MAX_W = 900;
+      let w = img.width, h = img.height;
+      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentCoverImage = canvas.toDataURL('image/jpeg', 0.85);
+      renderCoverPreview();
+    };
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 }
