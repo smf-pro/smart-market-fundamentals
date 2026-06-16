@@ -271,7 +271,7 @@
   @keyframes spin-sm { to { transform: rotate(360deg); } }
 
   /* ── ARTICLE PAGE (vue lecture) ─────────────── */
-  #articlePage { display: none; }
+  #articlePage { display: none; background: var(--surface); }
   #homePage { display: block; }
   .article-page-layout { display: grid; grid-template-columns: 1fr 300px; gap: 32px; max-width: 1200px; margin: 0 auto; align-items: start; padding: 6px 24px 80px; }
   .article-page-wrap { max-width: 800px; padding: 6px 0 80px; margin-left: 40px; }
@@ -1313,7 +1313,7 @@ function renderHero() {
         </div>
         <span class="hero-period">${featured.category ? getCatLabel(featured.category) : ''} · 2026</span>`;
   heroEl.innerHTML = `
-    <div class="hero-card" onclick="openArticle('${featured.id}')" style="cursor:pointer">
+    <div class="hero-card" onclick="openArticleNewTab('${featured.id}', event)" style="cursor:pointer">
       <div class="hero-visual${featured.coverImage?' has-cover':''}">
         <span class="hero-badge">Rapport vedette</span>
         ${heroVisualInner}
@@ -1343,7 +1343,7 @@ function renderHero() {
       ${sideArticles.map(a => {
         const sc = getCatColor(a.category);
         const sideIconInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[sc]||THUMB_ICONS.blue);
-        return `<div class="side-card" style="position:relative" onclick="openArticle('${a.id}')" style="cursor:pointer">
+        return `<div class="side-card" style="position:relative" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
           <div class="side-icon si-${sc}${a.coverImage?' has-cover':''}">${sideIconInner}</div>
           <div class="side-body">
             <div class="side-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1382,7 +1382,7 @@ function renderArticleList() {
   listEl.innerHTML = list.map(a => {
     const c = getCatColor(a.category);
     const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
-    return `<div class="art-row" onclick="openArticle('${a.id}')" style="cursor:pointer">
+    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
       <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
       <div class="art-content">
         <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1412,7 +1412,7 @@ function renderBancCentrale() {
     return;
   }
   el.innerHTML = list.map((a, i) => `
-    <div class="bc-article-row" onclick="openArticle('${a.id}')">
+    <div class="bc-article-row" onclick="openArticleNewTab('${a.id}', event)">
       <span class="bc-article-num">0${i+1}</span>
       <div class="bc-article-body">
         <div class="bc-article-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</div>
@@ -1427,7 +1427,7 @@ function renderTopPicks() {
   const el = document.getElementById('topPicksList');
   if (!el) return;
   el.innerHTML = picks.map((a,i) => `
-    <div class="pick-row" onclick="openArticle('${a.id}')" style="cursor:pointer">
+    <div class="pick-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
       <span class="pick-num">0${i+1}</span>
       <span class="pick-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</span>
       ${tagHTML(`${colors[i%5]}|${getCatLabel(a.category)}`)}
@@ -1477,7 +1477,7 @@ function handleSearch(query) {
   listEl.innerHTML = results.map(a => {
     const c = getCatColor(a.category);
     const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
-    return `<div class="art-row" onclick="openArticle('${a.id}')" style="cursor:pointer">
+    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
       <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
       <div class="art-content">
         <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -2036,7 +2036,7 @@ function renderArticleSidebars(id) {
   const pool = [...samecat, ...rest].slice(0, 6);
 
   const cardHTML = (a) => `
-    <div class="sidebar-card" onclick="openArticle('${a.id}')">
+    <div class="sidebar-card" onclick="openArticleNewTab('${a.id}', event)">
       <div class="sidebar-card-row">
         <div class="sidebar-card-info">
           <div class="sidebar-card-cat">${tagHTML(a.category)}</div>
