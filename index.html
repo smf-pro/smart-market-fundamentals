@@ -63,9 +63,9 @@
   .logo-name { font-family: var(--serif); font-size: 20px; color: var(--navy); letter-spacing: -0.5px; }
   .logo-name em { color: var(--blue); font-style: normal; }
   .nav-links { display: flex; gap: 2px; flex: 1; }
-  .nav-links a { font-size: 13px; font-weight: 500; color: var(--txt-muted); padding: 6px 12px; border-radius: var(--radius); transition: background 0.12s, color 0.12s; }
+  .nav-links a { font-size: 13px; font-weight: 500; color: var(--txt-muted); padding: 6px 12px; border-radius: var(--radius); transition: background 0.12s, color 0.12s, border-color 0.12s; border: 1.5px solid transparent; }
   .nav-links a:hover { background: var(--bg); color: var(--txt); }
-  .nav-links a.active { color: var(--blue); }
+  .nav-links a.active { color: var(--blue); border-color: var(--navy); }
   .nav-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
   .btn { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: var(--radius); cursor: pointer; transition: background 0.12s, color 0.12s; border: 1px solid transparent; }
   .btn-ghost { background: transparent; color: var(--txt-muted); border-color: var(--border); }
@@ -622,8 +622,9 @@
       const snap = await getDocs(collection(db, "articles"));
       const arts = [];
       snap.forEach(d => arts.push({ id: d.id, ...d.data() }));
-      // Trier par date de création décroissante
-      arts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      // Trier par date éditoriale décroissante (champ "date" choisi dans le
+      // formulaire, ex: "31 mai 2026"), pas par date de création en base.
+      if (typeof window.sortArticlesByDate === 'function') window.sortArticlesByDate(arts);
       window.articles = arts;
       if (typeof renderAll === 'function') renderAll();
       if (typeof updateStats === 'function') updateStats();
@@ -870,7 +871,7 @@
             <select class="form-select" id="fCategory">
               <option value="green|Forex">Forex</option>
               <option value="navy|Central Banks">Central Banks</option>
-              <option value="amber|Autre">Autre</option>
+              <option value="amber|Analyse Trades">Analyse Trades</option>
             </select>
           </div>
           <div class="form-row">
@@ -888,7 +889,7 @@
               <option value="blue|NZD">NZD</option>
               </optgroup>
               <optgroup label="── Jours ──">
-              <option value="navy|LAST WEEK">LAST WEEK</option>
+              <option value="navy|WEEK AHEAD">WEEK AHEAD</option>
               <option value="blue|LUNDI">LUNDI</option>
               <option value="blue|MARDI">MARDI</option>
               <option value="blue|MERCREDI">MERCREDI</option>
@@ -1083,7 +1084,7 @@
       <a href="#" class="active" onclick="filterCat(this,'',event)">ACCUEIL</a>
       <a href="#forex" onclick="filterCat(this,'Forex',event)">FOREX</a>
       <a href="#central-banks" onclick="filterCat(this,'Central Banks',event)">CENTRAL BANKS</a>
-      <a href="#autre" onclick="filterCat(this,'Autre',event)">AUTRE</a>
+      <a href="#analyse-trades" onclick="filterCat(this,'Analyse Trades',event)">ANALYSE TRADES</a>
     </div>
     <div class="nav-search-wrap" id="navSearchWrap">
       <div class="nav-search-box" id="navSearchBox">
@@ -1114,7 +1115,7 @@
     <a href="#" class="active" onclick="filterCat(this,'',event);closeMobileMenu()">ACCUEIL</a>
     <a href="#forex" onclick="filterCat(this,'Forex',event);closeMobileMenu()">FOREX</a>
     <a href="#central-banks" onclick="filterCat(this,'Central Banks',event);closeMobileMenu()">CENTRAL BANKS</a>
-    <a href="#autre" onclick="filterCat(this,'Autre',event);closeMobileMenu()">AUTRE</a>
+    <a href="#analyse-trades" onclick="filterCat(this,'Analyse Trades',event);closeMobileMenu()">ANALYSE TRADES</a>
   </div>
   <div class="mobile-menu-actions" id="mobileNavActions">
     <button class="btn btn-ghost" onclick="openLoginModal();closeMobileMenu()">Se connecter</button>
@@ -1274,7 +1275,10 @@ function getInitials(name) {
 }
 
 function getCatColor(cat) { return (cat || 'blue|').split('|')[0]; }
-function getCatLabel(cat) { return (cat || 'blue|').split('|')[1] || ''; }
+function getCatLabel(cat) {
+  const label = (cat || 'blue|').split('|')[1] || '';
+  return CATEGORY_ALIASES[label] || label;
+}
 
 function tagHTML(catVal) {
   if (!catVal) return '';
@@ -1352,6 +1356,23 @@ function renderHero() {
     </div>`;
 }
 
+// Anciens noms de catégorie/tag renommés : permet aux articles existants
+// en base (encore sous l'ancien nom) de continuer à apparaître sous le
+// nouveau filtre, sans avoir à les rééditer un par un.
+const CATEGORY_ALIASES = {
+  'Autre': 'Analyse Trades'
+};
+function categoryTextMatches(value, filter) {
+  if (!value) return false;
+  if (value.includes(filter)) return true;
+  // Vérifie aussi si la valeur stockée correspond à un ancien nom
+  // dont l'alias actuel est le filtre demandé.
+  for (const [oldName, newName] of Object.entries(CATEGORY_ALIASES)) {
+    if (newName === filter && value.includes(oldName)) return true;
+  }
+  return false;
+}
+
 function renderArticleList() {
   const listEl = document.getElementById('articleList');
   const featured = articles.find(a => a.featured);
@@ -1361,8 +1382,8 @@ function renderArticleList() {
   // Si un filtre est actif, n'afficher que les articles de cette catégorie
   if (currentFilter) {
     list = list.filter(a =>
-      (a.category||'').includes(currentFilter) ||
-      Object.keys(a.pages||{}).some(k => k.includes(currentFilter))
+      categoryTextMatches(a.category||'', currentFilter) ||
+      Object.keys(a.pages||{}).some(k => categoryTextMatches(k, currentFilter))
     );
   }
 
@@ -1599,7 +1620,7 @@ function resetTag2Options() {
     <option value="blue|NZD">NZD</option>
     </optgroup>
     <optgroup label="── Jours ──">
-    <option value="navy|LAST WEEK">LAST WEEK</option>
+    <option value="navy|WEEK AHEAD">WEEK AHEAD</option>
     <option value="blue|LUNDI">LUNDI</option>
     <option value="blue|MARDI">MARDI</option>
     <option value="blue|MERCREDI">MERCREDI</option>
@@ -1735,6 +1756,21 @@ function frDateToISO(fr) {
   return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
+// Trie un tableau d'articles par date éditoriale décroissante (du plus
+// récent au plus ancien), en place. Repli sur createdAt si la date du
+// champ "date" est absente ou non reconnue.
+window.sortArticlesByDate = function(list) {
+  list.sort((a, b) => {
+    const da = frDateToISO(a.date);
+    const dbb = frDateToISO(b.date);
+    if (da && dbb) return da < dbb ? 1 : da > dbb ? -1 : 0;
+    if (da) return -1;
+    if (dbb) return 1;
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+  return list;
+};
+
 // Nettoie le HTML avant sauvegarde : retire les paragraphes "placeholder fantôme" vides
 // (laissés tels quels dans les blocs image+texte non remplis par l'utilisateur).
 function sanitizeEditorContent(html) {
@@ -1849,14 +1885,14 @@ const CAT_TO_PATH = {
   '': '',
   'Forex': '#forex',
   'Central Banks': '#central-banks',
-  'Autre': '#autre'
+  'Analyse Trades': '#analyse-trades'
 };
 const PATH_TO_CAT = {
   '': '',
   '#': '',
   '#forex': 'Forex',
   '#central-banks': 'Central Banks',
-  '#autre': 'Autre'
+  '#analyse-trades': 'Analyse Trades'
 };
 
 function filterCat(el, cat, e, skipPush) {
@@ -1955,7 +1991,7 @@ function renderArticlePageContent(id, pageTag) {
     <blockquote>${a.excerpt}</blockquote>`;
 
   // Ordre fixe des pages (même ordre que le sélecteur de l'éditeur)
-  const PAGE_ORDER = ['green|USD','red|CAD','blue|EUR','navy|GBP','amber|CHF','green|JPY','red|AUD','blue|NZD','navy|LAST WEEK','blue|LUNDI','blue|MARDI','blue|MERCREDI','blue|JEUDI','blue|VENDREDI'];
+  const PAGE_ORDER = ['green|USD','red|CAD','blue|EUR','navy|GBP','amber|CHF','green|JPY','red|AUD','blue|NZD','navy|WEEK AHEAD','blue|LUNDI','blue|MARDI','blue|MERCREDI','blue|JEUDI','blue|VENDREDI'];
   // Onglets : Page principale + une par tag présent dans a.pages (aucun actif par défaut)
   // On exclut la catégorie principale (par valeur exacte ou par label) pour éviter le doublon.
   const mainCatLabel = getCatLabel(a.category).toLowerCase();
@@ -2811,7 +2847,7 @@ function syncMobileAdminMenu() {
 // ── INIT ──────────────────────────────────────
 renderAll();
 
-// Appliquer le filtre selon le hash de l'URL (ex: #forex, #autre)
+// Appliquer le filtre selon le hash de l'URL (ex: #forex, #analyse-trades)
 (function initFromPath() {
   const hash = window.location.hash || '';
   const cat = PATH_TO_CAT[hash] !== undefined ? PATH_TO_CAT[hash] : '';
