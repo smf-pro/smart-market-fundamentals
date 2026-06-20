@@ -809,7 +809,7 @@
         <button type="button" class="editor-btn editor-btn-dark" title="Aligner à droite" onclick="insertFormat('justifyRight')">⟹</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Justifier" onclick="insertFormat('justifyFull')">☰</button>
         <div class="editor-sep editor-sep-dark"></div>
-        <button type="button" class="editor-btn editor-btn-dark" title="Citation" onclick="insertFormat('formatBlock','BLOCKQUOTE')">❝</button>
+        <button type="button" id="citationBtn" class="editor-btn editor-btn-dark" title="Citation" onclick="toggleCitation()">❝</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Liste à puces" onclick="insertFormat('insertUnorderedList')">•≡</button>
         <button type="button" class="editor-btn editor-btn-dark" title="Liste numérotée" onclick="insertFormat('insertOrderedList')">1≡</button>
         <div class="editor-sep editor-sep-dark"></div>
@@ -2173,6 +2173,44 @@ function insertFormat(command, value) {
   updateCharCount();
 }
 
+// Toggle spécifique pour le bouton Citation : si le bloc courant est déjà
+// une <blockquote>, on le repasse en paragraphe normal ; sinon on applique
+// la citation. (formatBlock seul n'est pas un toggle natif du navigateur.)
+function toggleCitation() {
+  restoreEditorSelection();
+  const sel = window.getSelection();
+  let isQuote = false;
+  if (sel && sel.rangeCount) {
+    let node = sel.getRangeAt(0).startContainer;
+    if (node.nodeType === 3) node = node.parentElement;
+    const blockquoteEl = node ? node.closest('blockquote') : null;
+    const editor = document.getElementById('fContent');
+    isQuote = !!(blockquoteEl && editor && editor.contains(blockquoteEl));
+  }
+  try {
+    document.execCommand('formatBlock', false, isQuote ? 'P' : 'BLOCKQUOTE');
+  } catch (e) {}
+  saveEditorSelection();
+  updateCharCount();
+  updateCitationButtonState();
+}
+
+// Met à jour l'état visuel (actif/inactif) du bouton Citation selon la position du curseur
+function updateCitationButtonState() {
+  const btn = document.getElementById('citationBtn');
+  if (!btn) return;
+  const sel = window.getSelection();
+  let isQuote = false;
+  if (sel && sel.rangeCount) {
+    let node = sel.getRangeAt(0).startContainer;
+    if (node.nodeType === 3) node = node.parentElement;
+    const editor = document.getElementById('fContent');
+    const blockquoteEl = node ? node.closest('blockquote') : null;
+    isQuote = !!(blockquoteEl && editor && editor.contains(blockquoteEl));
+  }
+  btn.classList.toggle('active', isQuote);
+}
+
 // ── INTERLIGNE & ESPACEMENT ENTRE PARAGRAPHES ─
 // Récupère les blocs (paragraphes/titres/listes/citations) couverts par la sélection.
 // Si rien n'est sélectionné, applique à tout l'éditeur.
@@ -2640,6 +2678,9 @@ function updateGhostPlaceholders() {
 }
 
 document.getElementById('fContent').addEventListener('input', updateGhostPlaceholders);
+document.getElementById('fContent').addEventListener('input', updateCitationButtonState);
+document.getElementById('fContent').addEventListener('keyup', updateCitationButtonState);
+document.getElementById('fContent').addEventListener('mouseup', updateCitationButtonState);
 
 // ── COLLER UNE IMAGE (Ctrl+V) ─────────────────
 document.getElementById('fContent').addEventListener('paste', function(e) {
