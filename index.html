@@ -1984,7 +1984,7 @@ function renderArticlePageContent(id, pageTag) {
       Vous êtes en mode Admin — <button class="art-action-btn art-edit-btn" style="margin-left:4px" onclick="openEditModal('${id}',event)">Modifier cet article</button>
     </div>` : '';
 
-  const coverHTML = a.coverImage ? `<div class="art-page-cover"><img src="${a.coverImage}" alt="${a.title}" /></div>` : '';
+  const coverHTML = a.coverImage ? `<div class="art-page-cover" id="art-page-cover-wrap"><img src="${a.coverImage}" alt="${a.title}" /></div>` : '';
 
   const mainContent = a.content ? a.content : `
     <p>Cet article n'a pas encore de contenu détaillé. ${isAdmin ? 'Cliquez sur <strong>Modifier</strong> pour ajouter le contenu complet.' : 'Revenez prochainement pour lire l\'analyse complète.'}</p>
@@ -2008,13 +2008,14 @@ function renderArticlePageContent(id, pageTag) {
     });
   const tabsHTML = pageKeys.length > 0 ? `
     <div class="art-page-tabs">
-      ${pageKeys.map(k => `<button class="art-page-tab" onclick="showArticleSection('${id}','${k}', event)">${getCatLabel(k)}</button>`).join('')}
+      <button class="art-page-tab active" data-tag="" onclick="showArticleSection('${id}','', event)">OVERVIEW</button>
+      ${pageKeys.map(k => `<button class="art-page-tab" data-tag="${k}" onclick="showArticleSection('${id}','${k}', event)">${getCatLabel(k)}</button>`).join('')}
     </div>` : '';
 
   // Toutes les sections (principale + pages additionnelles), toutes visibles par défaut
   const sectionsHTML = `
     <section class="art-page-section" id="art-section-main" data-tag="">
-      ${pageKeys.length > 0 ? `<div class="art-section-label">Principal</div>` : ''}
+      ${pageKeys.length > 0 ? `<div class="art-section-label">OVERVIEW</div>` : ''}
       <div class="art-page-body">${mainContent}</div>
     </section>
     ${pageKeys.map(k => `
@@ -2045,25 +2046,46 @@ function renderArticlePageContent(id, pageTag) {
     ${tabsHTML}
     ${sectionsHTML}`;
 
-  // Si une page précise a été demandée (ex: depuis un lien), on l'affiche seule
-  if (pageTag) {
-    showArticleSection(id, pageTag);
+  // Toujours appliquer le filtrage des sections dès l'ouverture : si une page
+  // précise a été demandée (ex: depuis un lien) on l'affiche seule, sinon
+  // c'est OVERVIEW (pageTag = '') qui est affiché seul par défaut.
+  if (pageKeys.length > 0) {
+    showArticleSection(id, pageTag || '');
   }
 }
 
 // Affiche uniquement la section choisie et masque les autres.
+// Quand un filtre (sous-page) est sélectionné, on masque aussi l'image de
+// couverture et le texte principal : seuls Titre, Sous-titre et la section
+// sélectionnée restent visibles.
 function showArticleSection(id, pageTag, e) {
   document.querySelectorAll('.art-page-section').forEach(sec => {
-    // La section principale (data-tag="") reste toujours visible
-    if (sec.dataset.tag === '') { sec.style.display = 'block'; return; }
+    // La section principale (data-tag="") n'est visible que si aucun filtre n'est actif
+    if (sec.dataset.tag === '') { sec.style.display = pageTag ? 'none' : 'block'; return; }
     sec.style.display = (sec.dataset.tag === pageTag) ? 'block' : 'none';
   });
+
+  const coverEl = document.getElementById('art-page-cover-wrap');
+  if (coverEl) coverEl.style.display = pageTag ? 'none' : 'block';
+
   document.querySelectorAll('.art-page-tab').forEach(tab => tab.classList.remove('active'));
   if (e && e.currentTarget) {
     e.currentTarget.classList.add('active');
   } else {
     const tabs = document.querySelectorAll('.art-page-tab');
-    if (tabs[0]) tabs[0].classList.add('active');
+    const match = [...tabs].find(t => t.getAttribute('data-tag') === pageTag);
+    (match || tabs[0])?.classList.add('active');
+  }
+
+  // Repositionner le haut de la section sélectionnée pour démarrer la lecture
+  // depuis le début (tient compte de la barre d'onglets collante en haut).
+  if (pageTag) {
+    const targetSection = document.getElementById('art-section-' + pageTag);
+    if (targetSection) {
+      const offset = 90;
+      const top = targetSection.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
   }
 }
 
