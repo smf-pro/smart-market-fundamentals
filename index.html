@@ -869,9 +869,8 @@
           <div class="form-row">
             <label class="form-label">Catégorie principale</label>
             <select class="form-select" id="fCategory">
-              <option value="green|Forex">Forex</option>
-              <option value="navy|Central Banks">Central Banks</option>
-              <option value="amber|Analyse Trades">Analyse Trades</option>
+              <option value="blue|Analyse Fondamentale">Analyse Fondamentale</option>
+              <option value="amber|Analyse Technique">Analyse Technique</option>
             </select>
           </div>
           <div class="form-row">
@@ -1082,9 +1081,8 @@
     </a>
     <div class="nav-links">
       <a href="#" class="active" onclick="filterCat(this,'',event)">ACCUEIL</a>
-      <a href="#forex" onclick="filterCat(this,'Forex',event)">FOREX</a>
-      <a href="#central-banks" onclick="filterCat(this,'Central Banks',event)">CENTRAL BANKS</a>
-      <a href="#analyse-trades" onclick="filterCat(this,'Analyse Trades',event)">ANALYSE TRADES</a>
+      <a href="#analyse-fondamentale" onclick="filterCat(this,'Analyse Fondamentale',event)">ANALYSE FONDAMENTALE</a>
+      <a href="#analyse-technique" onclick="filterCat(this,'Analyse Technique',event)">ANALYSE TECHNIQUE</a>
     </div>
     <div class="nav-search-wrap" id="navSearchWrap">
       <div class="nav-search-box" id="navSearchBox">
@@ -1113,9 +1111,8 @@
   </div>
   <div class="mobile-menu-nav">
     <a href="#" class="active" onclick="filterCat(this,'',event);closeMobileMenu()">ACCUEIL</a>
-    <a href="#forex" onclick="filterCat(this,'Forex',event);closeMobileMenu()">FOREX</a>
-    <a href="#central-banks" onclick="filterCat(this,'Central Banks',event);closeMobileMenu()">CENTRAL BANKS</a>
-    <a href="#analyse-trades" onclick="filterCat(this,'Analyse Trades',event);closeMobileMenu()">ANALYSE TRADES</a>
+    <a href="#analyse-fondamentale" onclick="filterCat(this,'Analyse Fondamentale',event);closeMobileMenu()">ANALYSE FONDAMENTALE</a>
+    <a href="#analyse-technique" onclick="filterCat(this,'Analyse Technique',event);closeMobileMenu()">ANALYSE TECHNIQUE</a>
   </div>
   <div class="mobile-menu-actions" id="mobileNavActions">
     <button class="btn btn-ghost" onclick="openLoginModal();closeMobileMenu()">Se connecter</button>
@@ -1360,7 +1357,10 @@ function renderHero() {
 // en base (encore sous l'ancien nom) de continuer à apparaître sous le
 // nouveau filtre, sans avoir à les rééditer un par un.
 const CATEGORY_ALIASES = {
-  'Autre': 'Analyse Trades'
+  'Forex': 'Analyse Fondamentale',
+  'Central Banks': 'Analyse Fondamentale',
+  'Autre': 'Analyse Fondamentale',
+  'Analyse Trades': 'Analyse Technique'
 };
 function categoryTextMatches(value, filter) {
   if (!value) return false;
@@ -1385,6 +1385,8 @@ function renderArticleList() {
       categoryTextMatches(a.category||'', currentFilter) ||
       Object.keys(a.pages||{}).some(k => categoryTextMatches(k, currentFilter))
     );
+  } else {
+    // À l'accueil (aucun filtre), tous les articles sont visibles
   }
 
   if (list.length === 0) {
@@ -1651,7 +1653,7 @@ function openNewArticleModal() {
   document.getElementById('fExcerpt').value = '';
   document.getElementById('fAuthor').value = '';
   document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('fCategory').value = 'green|Forex';
+  document.getElementById('fCategory').value = 'blue|Analyse Fondamentale';
   resetTag2Options();
   document.getElementById('fTag2').value = '';
   document.getElementById('fNewPageName').value = '';
@@ -1883,16 +1885,14 @@ async function confirmDelete() {
 // ── MAPPING CATÉGORIE <-> HASH ────────────────
 const CAT_TO_PATH = {
   '': '',
-  'Forex': '#forex',
-  'Central Banks': '#central-banks',
-  'Analyse Trades': '#analyse-trades'
+  'Analyse Fondamentale': '#analyse-fondamentale',
+  'Analyse Technique': '#analyse-technique'
 };
 const PATH_TO_CAT = {
   '': '',
   '#': '',
-  '#forex': 'Forex',
-  '#central-banks': 'Central Banks',
-  '#analyse-trades': 'Analyse Trades'
+  '#analyse-fondamentale': 'Analyse Fondamentale',
+  '#analyse-technique': 'Analyse Technique'
 };
 
 function filterCat(el, cat, e, skipPush) {
@@ -2100,7 +2100,7 @@ function renderArticleSidebars(id) {
   const pool = [...samecat, ...rest].slice(0, 6);
 
   const cardHTML = (a) => `
-    <div class="sidebar-card" onclick="openArticleNewTab('${a.id}', event)">
+    <div class="sidebar-card" onclick="openArticle('${a.id}')">
       <div class="sidebar-card-row">
         <div class="sidebar-card-info">
           <div class="sidebar-card-cat">${tagHTML(a.category)}</div>
