@@ -289,13 +289,19 @@
   .back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--txt-muted); cursor: pointer; margin-bottom: 28px; padding: 7px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); transition: all 0.12s; }
   .back-btn:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-lt); }
   .art-page-header { margin-bottom: 32px; }
-  .art-page-tabs { display: flex; gap: 6px; margin-top: -32px; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 0; padding-top: 4px; position: sticky; top: 56px; z-index: 50; background: var(--bg); justify-content: center; }
-  .art-page-tab { font-size: 13px; font-weight: 500; padding: 8px 18px; border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; background: var(--bg); color: var(--txt-muted); cursor: pointer; transition: all 0.12s; margin-bottom: -1px; }
-  .art-page-tab:hover { color: var(--blue); background: var(--blue-lt); }
-  .art-page-tab.active { background: var(--surface); color: var(--navy); border-color: var(--border); border-bottom: 2px solid var(--surface); font-weight: 600; }
-  .art-page-section { padding-top: 4px; }
-  .art-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--txt-faint); margin-bottom: 16px; }
-  .art-page-section + .art-page-section { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .art-page-tabs { display: none; } /* désactivé — remplacé par accordéon */
+  .art-accordion { margin-top: 12px; margin-bottom: 32px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .art-acc-item { border-bottom: 1px solid var(--border); }
+  .art-acc-item:last-child { border-bottom: none; }
+  .art-acc-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; cursor: pointer; background: var(--surface); transition: background 0.12s; user-select: none; }
+  .art-acc-header:hover { background: var(--blue-lt); }
+  .art-acc-header.open { background: var(--navy); }
+  .art-acc-label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--txt-muted); }
+  .art-acc-header.open .art-acc-label { color: #fff; }
+  .art-acc-chevron { width: 16px; height: 16px; stroke: var(--txt-faint); fill: none; stroke-width: 2; flex-shrink: 0; transition: transform 0.2s; }
+  .art-acc-header.open .art-acc-chevron { transform: rotate(180deg); stroke: #fff; }
+  .art-acc-body { display: none; padding: 24px 20px; background: var(--bg); }
+  .art-acc-body.open { display: block; }
   .art-page-tags { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
   .art-page-title { font-family: var(--serif); font-size: 32px; color: var(--navy); line-height: 1.25; letter-spacing: -0.5px; margin-bottom: 16px; }
   .art-page-excerpt { font-size: 17px; color: var(--txt-muted); line-height: 1.75; margin-bottom: 24px; border-left: 3px solid var(--blue); padding-left: 16px; }
@@ -410,7 +416,16 @@
   .img-row { display: flex; gap: 10px; margin: 14px 0; }
   #fContent .img-row img, .art-page-body .img-row img { flex: 1; min-width: 0; max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 0; object-fit: cover; }
   .img-row .img-row-spacer { flex: 1; min-width: 0; }
-  .art-page-body .img-row { margin: 24px 0; }
+  /* Sur la page article, les images côte à côte débordent pour occuper toute la largeur */
+  .art-page-body .img-row {
+    margin: 24px -24px;
+    width: calc(100% + 48px);
+    gap: 6px;
+  }
+  .art-page-body .img-row img {
+    aspect-ratio: 4/3;
+    object-fit: cover;
+  }
 
   /* Image + texte côte à côte */
   .img-text-row { display: flex; gap: 18px; margin: 14px 0; align-items: flex-start; }
@@ -1310,7 +1325,7 @@ function renderHero() {
         </div>
         <span class="hero-period">${featured.category ? getCatLabel(featured.category) : ''} · 2026</span>`;
   heroEl.innerHTML = `
-    <div class="hero-card" onclick="openArticleNewTab('${featured.id}', event)" style="cursor:pointer">
+    <a class="hero-card" href="${articleURL(featured.id)}" onclick="openArticleNewTab('${featured.id}', event)" style="cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column">
       <div class="hero-visual${featured.coverImage?' has-cover':''}">
         <span class="hero-badge">Rapport vedette</span>
         ${heroVisualInner}
@@ -1335,12 +1350,12 @@ function renderHero() {
           <span class="footer-dl" style="cursor:pointer;color:var(--blue)">Lire l'article →</span>
         </div>
       </div>
-    </div>
+    </a>
     <div class="hero-side">
       ${sideArticles.map(a => {
         const sc = getCatColor(a.category);
         const sideIconInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[sc]||THUMB_ICONS.blue);
-        return `<div class="side-card" style="position:relative" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+        return `<a class="side-card" href="${articleURL(a.id)}" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer;text-decoration:none;color:inherit;display:flex;position:relative">
           <div class="side-icon si-${sc}${a.coverImage?' has-cover':''}">${sideIconInner}</div>
           <div class="side-body">
             <div class="side-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1348,7 +1363,7 @@ function renderHero() {
             <div class="side-footer"><span>${a.author}</span><span>·</span><span>${a.date}</span>${a.readTime?`<span>·</span><span>${a.readTime}</span>`:''}</div>
           </div>
           ${adminActionsHTML(a.id)}
-        </div>`;
+        </a>`;
       }).join('')}
     </div>`;
 }
@@ -1371,6 +1386,12 @@ function categoryTextMatches(value, filter) {
     if (newName === filter && value.includes(oldName)) return true;
   }
   return false;
+}
+
+function articleURL(id) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('article', id);
+  return url.toString();
 }
 
 function renderArticleList() {
@@ -1401,7 +1422,7 @@ function renderArticleList() {
   listEl.innerHTML = list.map(a => {
     const c = getCatColor(a.category);
     const thumbInner = a.coverImage ? `<img class="cover-img" src="${a.coverImage}" alt="" />` : (THUMB_ICONS[c]||THUMB_ICONS.blue);
-    return `<div class="art-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+    return `<a class="art-row" href="${articleURL(a.id)}" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer;text-decoration:none;color:inherit;display:flex">
       <div class="art-thumb at-${c}${a.coverImage?' has-cover':''}">${thumbInner}</div>
       <div class="art-content">
         <div class="art-tags">${tagHTML(a.category)}${pageTagsHTML(a)}</div>
@@ -1416,7 +1437,7 @@ function renderArticleList() {
         </div>
       </div>
       ${adminActionsHTML(a.id)}
-    </div>`;
+    </a>`;
   }).join('');
 }
 
@@ -1431,13 +1452,13 @@ function renderBancCentrale() {
     return;
   }
   el.innerHTML = list.map((a, i) => `
-    <div class="bc-article-row" onclick="openArticleNewTab('${a.id}', event)">
+    <a class="bc-article-row" href="${articleURL(a.id)}" onclick="openArticleNewTab('${a.id}', event)" style="text-decoration:none;color:inherit">
       <span class="bc-article-num">0${i+1}</span>
       <div class="bc-article-body">
         <div class="bc-article-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</div>
         <div class="bc-article-date">${a.author} · ${a.date}</div>
       </div>
-    </div>`).join('');
+    </a>`).join('');
 }
 
 function renderTopPicks() {
@@ -1446,11 +1467,11 @@ function renderTopPicks() {
   const el = document.getElementById('topPicksList');
   if (!el) return;
   el.innerHTML = picks.map((a,i) => `
-    <div class="pick-row" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer">
+    <a class="pick-row" href="${articleURL(a.id)}" onclick="openArticleNewTab('${a.id}', event)" style="cursor:pointer;text-decoration:none;color:inherit;display:flex;align-items:center">
       <span class="pick-num">0${i+1}</span>
       <span class="pick-title">${a.title.length > 70 ? a.title.slice(0,70)+'…' : a.title}</span>
       ${tagHTML(`${colors[i%5]}|${getCatLabel(a.category)}`)}
-    </div>`).join('');
+    </a>`).join('');
 }
 
 function updateStats() {
@@ -1989,6 +2010,13 @@ function openArticleNewTab(id, e) {
   window.open(url.toString(), '_blank');
 }
 
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  const isOpen = header.classList.contains('open');
+  header.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+}
+
 function openArticle(id, skipHistory) {
   const a = articles.find(x => x.id === id);
   if (!a) return;
@@ -2039,24 +2067,31 @@ function renderArticlePageContent(id, pageTag) {
       if (ib === -1) return -1;
       return ia - ib;
     });
-  const tabsHTML = pageKeys.length > 0 ? `
-    <div class="art-page-tabs">
-      <button class="art-page-tab active" data-tag="" onclick="showArticleSection('${id}','', event)">OVERVIEW</button>
-      ${pageKeys.map(k => `<button class="art-page-tab" data-tag="${k}" onclick="showArticleSection('${id}','${k}', event)">${getCatLabel(k)}</button>`).join('')}
-    </div>` : '';
+  const accordionHTML = pageKeys.length > 0 ? `
+    <div class="art-accordion">
+      <div class="art-acc-item">
+        <div class="art-acc-header open" onclick="toggleAccordion(this)">
+          <span class="art-acc-label">OVERVIEW</span>
+          <svg class="art-acc-chevron" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+        <div class="art-acc-body open">
+          <div class="art-page-body">${mainContent}</div>
+        </div>
+      </div>
+      ${pageKeys.map(k => `
+      <div class="art-acc-item">
+        <div class="art-acc-header" onclick="toggleAccordion(this)">
+          <span class="art-acc-label">${getCatLabel(k)}</span>
+          <svg class="art-acc-chevron" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+        <div class="art-acc-body">
+          <div class="art-page-body">${a.pages[k] || ''}</div>
+        </div>
+      </div>`).join('')}
+    </div>` : `<div class="art-page-body">${mainContent}</div>`;
 
-  // Toutes les sections (principale + pages additionnelles), toutes visibles par défaut
-  const sectionsHTML = `
-    <section class="art-page-section" id="art-section-main" data-tag="">
-      ${pageKeys.length > 0 ? `<div class="art-section-label">OVERVIEW</div>` : ''}
-      <div class="art-page-body">${mainContent}</div>
-    </section>
-    ${pageKeys.map(k => `
-    <section class="art-page-section" id="art-section-${k}" data-tag="${k}">
-      <div class="art-section-label">${getCatLabel(k)}</div>
-      <div class="art-page-body">${a.pages[k] || ''}</div>
-    </section>`).join('')}
-  `;
+  const tabsHTML = '';
+  const sectionsHTML = '';
 
   document.getElementById('articlePageContent').innerHTML = `
     ${adminBar}
@@ -2077,7 +2112,7 @@ function renderArticlePageContent(id, pageTag) {
       </div>
     </div>
     ${tabsHTML}
-    ${sectionsHTML}`;
+    ${accordionHTML}`;
 
   // Toujours appliquer le filtrage des sections dès l'ouverture : si une page
   // précise a été demandée (ex: depuis un lien) on l'affiche seule, sinon
@@ -2127,13 +2162,19 @@ function renderArticleSidebars(id) {
   const current = articles.find(x => x.id === id);
   if (!current) return;
 
-  const others = articles.filter(x => x.id !== id);
-  const samecat = others.filter(x => x.category === current.category);
-  const rest = others.filter(x => x.category !== current.category);
-  const pool = [...samecat, ...rest].slice(0, 6);
+  // Uniquement les articles de la même catégorie, triés par date décroissante
+  const pool = articles
+    .filter(x => x.id !== id && categoryTextMatches(x.category||'', getCatLabel(current.category)))
+    .sort((a, b) => {
+      const da = frDateToISO(a.date) || '';
+      const db = frDateToISO(b.date) || '';
+      if (da && db) return da < db ? 1 : da > db ? -1 : 0;
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    })
+    .slice(0, 6);
 
   const cardHTML = (a) => `
-    <div class="sidebar-card" onclick="openArticle('${a.id}')">
+    <a class="sidebar-card" href="${articleURL(a.id)}" onclick="openArticle('${a.id}');return false;" style="text-decoration:none;color:inherit;display:block">
       <div class="sidebar-card-row">
         <div class="sidebar-card-info">
           <div class="sidebar-card-cat">${tagHTML(a.category)}</div>
@@ -2142,7 +2183,7 @@ function renderArticleSidebars(id) {
         </div>
         ${a.coverImage ? `<div class="sidebar-card-thumb"><img src="${a.coverImage}" alt="${a.title}" /></div>` : ''}
       </div>
-    </div>`;
+    </a>`;
 
   document.getElementById('articleSidebarRight').innerHTML = pool.length === 0 ? '' : `
     <div class="sidebar-title">À lire aussi</div>
