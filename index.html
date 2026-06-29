@@ -282,7 +282,7 @@
   .sidebar-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
   .sidebar-card-row { display: flex; gap: 10px; align-items: flex-start; }
   .sidebar-card-thumb { width: 64px; min-width: 64px; height: 64px; border-radius: 6px; overflow: hidden; }
-  .sidebar-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .sidebar-card-thumb img { width: 100%; height: 100%; object-fit: cover; border: 1.5px solid var(--navy); border-radius: var(--radius); }
   .sidebar-card-info { flex: 1; min-width: 0; }
   .sidebar-card-cat { margin-bottom: 4px; }
   .sidebar-card-title { font-size: 13px; font-weight: 600; color: var(--navy); line-height: 1.4; margin-bottom: 6px; }
@@ -313,7 +313,7 @@
   .art-page-stats { margin-left: auto; display: flex; gap: 16px; }
   .art-page-stat { font-family: var(--mono); font-size: 12px; color: var(--txt-faint); background: var(--bg); padding: 4px 10px; border-radius: 4px; }
   .art-page-body { font-size: 16px; line-height: 1.85; color: var(--txt); }
-  .art-page-body img { max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 24px auto; }
+  .art-page-body img { max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 24px auto; border: 1.5px solid var(--navy); }
   .art-page-body h2 { font-family: var(--sans); font-weight: 700; font-size: 22px; color: var(--navy); margin: 32px 0 12px; }
   .art-page-body h3 { font-size: 17px; font-weight: 600; color: var(--navy); margin: 24px 0 8px; }
   .art-page-body p { margin-bottom: 18px; }
@@ -387,7 +387,7 @@
   #fContent p { margin-bottom: 12px; }
   #fContent ul, #fContent ol { padding-left: 22px; margin-bottom: 12px; }
   #fContent blockquote { background: var(--blue-lt); border-left: 4px solid var(--blue); padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0; margin: 14px 0; color: var(--navy); font-style: italic; }
-  #fContent img { max-width: 100%; border-radius: var(--radius); display: block; margin: 14px 0; }
+  #fContent img { max-width: 100%; border-radius: var(--radius); display: block; margin: 14px 0; border: 1.5px solid var(--navy); }
   #fContent img.editor-img-selected { outline: 2px solid var(--blue); }
 
   /* Tailles d'image simple, centrées */
@@ -413,21 +413,38 @@
   .editor-sep-label[contenteditable="false"] { user-select: none; cursor: default; }
   #fContent:empty::before { content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none; }
 
+  /* Tailles du diaporama */
+  .img-row.img-row-small  { width: 33%; margin-left: auto; margin-right: auto; }
+  .img-row.img-row-medium { width: 50%; margin-left: auto; margin-right: auto; }
+  .img-row.img-row-large  { width: 75%; margin-left: auto; margin-right: auto; }
+  .img-row.img-row-full   { width: 100%; }
+  @media (max-width: 640px) {
+    .img-row.img-row-small, .img-row.img-row-medium { width: 100%; }
+    .img-row.img-row-large { width: 100%; }
+  }
   /* Groupes d'images en diaporama (transition "Push") */
   .img-row { position: relative; margin: 14px 0; overflow: hidden; border-radius: var(--radius); background: #00000006; }
   .img-row-track { display: flex; width: 100%; transition: transform 0.5s cubic-bezier(0.65,0,0.35,1); }
-  .img-row-cell { flex: 0 0 100%; min-width: 0; display: flex; flex-direction: column; gap: 0; }
-  .img-row-cell img { width: 100%; height: auto; display: block; margin: 0; object-fit: cover; }
+  .img-row-cell { flex: 0 0 100%; min-width: 0; position: relative; display: flex; flex-direction: column; }
+  .img-row-cell img { width: 100%; height: auto; display: block; margin: 0; object-fit: cover; border: 1.5px solid var(--navy); }
   .img-row-caption {
-    font-size: 12px; color: var(--txt-faint); text-align: center;
-    padding: 8px 6px 0; line-height: 1.4; font-style: italic;
-    min-height: 20px;
+    display: block; position: static; z-index: 3;
+    font-size: 15px; color: var(--navy); text-align: left;
+    line-height: 1.4; font-style: italic; font-weight: 500;
+    padding: 6px 20px 8px; border-radius: 0;
+    max-width: 100%; pointer-events: none;
+    background: transparent; backdrop-filter: none;
   }
-  /* Éditeur : légende éditable */
+  /* Éditeur : légende éditable (sous l'image pour faciliter l'édition) */
   #fContent .img-row-caption {
-    border: none; outline: none; background: transparent;
+    position: static; top: auto; left: auto;
+    background: transparent; backdrop-filter: none;
+    border: none; outline: none;
     display: block; width: 100%; font-family: var(--sans);
     cursor: text; border-bottom: 1px dashed var(--border);
+    color: var(--txt-faint); padding: 6px 6px 4px;
+    font-size: 12px; max-width: 100%;
+    pointer-events: auto;
   }
   #fContent .img-row-caption:empty::before {
     content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none;
@@ -460,8 +477,7 @@
     object-fit: cover;
   }
   .art-page-body .img-row-caption {
-    padding: 8px 24px 0;
-    font-size: 12px;
+    font-size: 15px;
   }
 
   /* Image + texte côte à côte */
@@ -913,6 +929,13 @@
               <button type="button" data-size="large" onclick="setImageSize('large')">Large</button>
               <button type="button" data-size="full" onclick="setImageSize('full')">Pleine largeur</button>
             </div>
+            <div class="img-size-toolbar" id="diapoSizeToolbar" style="top:0;left:0">
+              <span style="font-size:10px;color:#8A9DB5;padding:0 4px;align-self:center;white-space:nowrap">Diapo :</span>
+              <button type="button" data-size="small"  onclick="setDiapoRowSize('small')">Petite</button>
+              <button type="button" data-size="medium" onclick="setDiapoRowSize('medium')">Moyenne</button>
+              <button type="button" data-size="large"  onclick="setDiapoRowSize('large')">Large</button>
+              <button type="button" data-size="full"   onclick="setDiapoRowSize('full')">Pleine largeur</button>
+            </div>
           </div>
         </div>
         <div class="editor-side">
@@ -985,37 +1008,29 @@
     </div>
     <div class="modal-body">
       <div id="imageLayoutChoiceView">
-        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Choisissez combien d'images inclure dans le diaporama (effet Push : chaque image pousse la précédente hors de l'écran). Une fois inséré, cliquez sur une image seule pour ajuster sa taille (petite, moyenne, large, pleine largeur).</p>
-        <div class="img-layout-grid">
-          <button type="button" class="img-layout-opt img-layout-opt-wide" onclick="chooseImageLayout('sized')">
-            <div class="img-layout-preview img-layout-preview-sized">
+        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Choisissez le type d'insertion. Une fois inséré, cliquez sur une image pour ajuster sa taille (petite, moyenne, large, pleine largeur).</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <!-- 1 image -->
+          <button type="button" class="img-layout-opt" style="flex-direction:column;gap:8px;padding:16px 12px" onclick="chooseImageLayout('sized')">
+            <div class="img-layout-preview img-layout-preview-sized" style="width:100%">
               <span class="ils-bar" style="width:100%;opacity:.9"></span>
               <span class="ils-bar" style="width:75%;opacity:.72"></span>
               <span class="ils-bar" style="width:50%;opacity:.55"></span>
               <span class="ils-bar" style="width:33%;opacity:.38"></span>
             </div>
-            <span class="img-layout-label">1 image – taille au choix</span>
-          </button>
-          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(1)">
-            <div class="img-layout-preview"><span></span></div>
             <span class="img-layout-label">1 image</span>
           </button>
-          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(2)">
-            <div class="img-layout-preview"><span></span><span></span></div>
-            <span class="img-layout-label">2 en diaporama</span>
-          </button>
-          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(3)">
-            <div class="img-layout-preview"><span></span><span></span><span></span></div>
-            <span class="img-layout-label">3 en diaporama</span>
-          </button>
-          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(4)">
-            <div class="img-layout-preview" style="gap:2px"><span></span><span></span><span></span><span></span></div>
-            <span class="img-layout-label">4 en diaporama</span>
-          </button>
-          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(5)">
-            <div class="img-layout-preview" style="gap:2px"><span></span><span></span><span></span><span></span><span></span></div>
-            <span class="img-layout-label">5 en diaporama</span>
-          </button>
+          <!-- Diaporama -->
+          <div class="img-layout-opt" style="flex-direction:column;gap:8px;padding:16px 12px;cursor:default;border:1.5px solid var(--border);border-radius:var(--radius-lg)">
+            <div class="img-layout-preview" style="width:100%;gap:3px">
+              <span></span><span style="opacity:.7"></span><span style="opacity:.4"></span>
+            </div>
+            <span class="img-layout-label">Diaporama</span>
+            <button type="button" class="btn btn-primary" style="width:100%;margin-top:2px;font-size:12px;padding:6px 10px" onclick="chooseImageLayout(3)">Commencer →</button>
+          </div>
+        </div>
+        <!-- Image + texte / Texte + image -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <button type="button" class="img-layout-opt" onclick="chooseImageLayout('text-left')">
             <div class="img-layout-preview"><span></span><span class="img-layout-text"></span></div>
             <span class="img-layout-label">Image + texte</span>
@@ -1053,8 +1068,22 @@
         </div>
       </div>
       <div id="imageLayoutSlotsView" style="display:none">
-        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Cliquez sur chaque emplacement pour uploader une image. Ajoutez une légende optionnelle sous chaque slot. Laissez un emplacement vide pour ne pas l'utiliser.</p>
+        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:6px">Cliquez sur chaque emplacement pour uploader une image. Ajoutez une légende optionnelle sous chaque slot. Laissez un emplacement vide pour ne pas l'utiliser.</p>
+        <p style="font-size:12px;color:var(--blue);margin-bottom:14px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📋</span> Astuce : vous pouvez aussi coller une image copiée avec <strong>Ctrl+V</strong> (Cmd+V sur Mac) — elle ira dans l'emplacement actif ou le premier emplacement vide.</p>
+        <!-- Sélecteur de taille du diaporama -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+          <button type="button" class="diapo-size-tab active" data-size="full"   onclick="setDiapoSize('full',this)"   style="flex:1;font-size:12px;font-weight:600;padding:6px 4px;border-radius:var(--radius);border:1.5px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;transition:all .12s">Pleine largeur</button>
+          <button type="button" class="diapo-size-tab"        data-size="large"  onclick="setDiapoSize('large',this)"  style="flex:1;font-size:12px;font-weight:600;padding:6px 4px;border-radius:var(--radius);border:1.5px solid var(--border);background:transparent;color:var(--txt-muted);cursor:pointer;transition:all .12s">Large</button>
+          <button type="button" class="diapo-size-tab"        data-size="medium" onclick="setDiapoSize('medium',this)" style="flex:1;font-size:12px;font-weight:600;padding:6px 4px;border-radius:var(--radius);border:1.5px solid var(--border);background:transparent;color:var(--txt-muted);cursor:pointer;transition:all .12s">Moyenne</button>
+          <button type="button" class="diapo-size-tab"        data-size="small"  onclick="setDiapoSize('small',this)"  style="flex:1;font-size:12px;font-weight:600;padding:6px 4px;border-radius:var(--radius);border:1.5px solid var(--border);background:transparent;color:var(--txt-muted);cursor:pointer;transition:all .12s">Petite</button>
+        </div>
         <div class="img-slots-row" id="imageSlotsRow"></div>
+        <div style="margin-bottom:12px">
+          <button type="button" onclick="addDiapoSlot()" style="width:100%;font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(--radius);border:1.5px dashed var(--border);background:transparent;color:var(--blue);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-lt)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter une image
+          </button>
+        </div>
         <div class="img-slots-actions">
           <button type="button" class="btn btn-ghost" onclick="backToImageLayoutChoice()">← Retour</button>
           <button type="button" class="btn btn-primary" onclick="confirmImageSlots()">Insérer</button>
@@ -2595,8 +2624,38 @@ function renderCoverPreview() {
 // ── IMAGES : INSERTION CÔTE À CÔTE ────────────
 let pendingImageLayout = 1;
 let pendingImageSizeClass = 'img-size-full';
+let pendingDiapoSize = 'full'; // Taille du diaporama : small/medium/large/full
 let imageSlots = []; // { dataUrl: string|null } pour les layouts à 2/3 colonnes
 let activeSlotIndex = null;
+
+function addDiapoSlot() {
+  // Sauvegarder les légendes actuelles
+  document.querySelectorAll('.img-slot-caption-input').forEach(inp => {
+    const idx = parseInt(inp.dataset.index);
+    if (!isNaN(idx)) imageSlots[idx].caption = inp.value;
+  });
+  imageSlots.push({ dataUrl: null });
+  renderImageSlots();
+  // Mettre à jour le titre
+  document.getElementById('imageLayoutTitle').textContent = imageSlots.length + ' images en diaporama';
+  // Ouvrir le sélecteur de fichier sur le nouveau slot, avec sélection multiple
+  activeSlotIndex = imageSlots.length - 1;
+  const input = document.getElementById('fInlineImageInput');
+  input.setAttribute('multiple', 'multiple');
+  input.click();
+}
+
+function adjustDiapoCount(delta) {
+  const inp = document.getElementById('diapoCountInput');
+  if (!inp) return;
+  let val = (parseInt(inp.value) || 3) + delta;
+  if (val < 2) val = 2;
+  inp.value = val;
+}
+function clampDiapoCount(inp) {
+  let val = parseInt(inp.value);
+  if (isNaN(val) || val < 2) inp.value = 2;
+}
 
 function openImageLayoutModal() {
   saveEditorSelection();
@@ -2611,7 +2670,6 @@ function closeImageLayoutModal() {
 
 function backToImageLayoutChoice() {
   document.getElementById('imageLayoutChoiceView').style.display = '';
-  document.getElementById('imageLayoutChoiceView').querySelector('.img-layout-grid').style.display = '';
   if (document.getElementById('imageLayoutSizeView')) document.getElementById('imageLayoutSizeView').style.display = 'none';
   document.getElementById('imageLayoutSlotsView').style.display = 'none';
   document.getElementById('imageLayoutTitle').textContent = 'Insérer des images';
@@ -2621,14 +2679,22 @@ function chooseImageLayout(layout) {
   pendingImageLayout = layout;
   if (layout === 'sized') {
     // Show size picker sub-view
-    document.getElementById('imageLayoutChoiceView').querySelector('.img-layout-grid').style.display = 'none';
+    document.getElementById('imageLayoutChoiceView').style.display = 'none';
     document.getElementById('imageLayoutSizeView').style.display = '';
     document.getElementById('imageLayoutTitle').textContent = '1 image – taille au choix';
     return;
   }
-  if (layout === 2 || layout === 3 || layout === 4 || layout === 5) {
+  if (typeof layout === 'number' && layout >= 2) {
     // Passer à la vue "slots" : upload individuel et optionnel par emplacement
     imageSlots = Array.from({ length: layout }, () => ({ dataUrl: null }));
+    pendingDiapoSize = 'full'; // reset taille par défaut
+    // Reset les onglets de taille visuellement
+    document.querySelectorAll('.diapo-size-tab').forEach(b => {
+      const active = b.dataset.size === 'full';
+      b.style.background = active ? 'var(--navy)' : 'transparent';
+      b.style.color = active ? '#fff' : 'var(--txt-muted)';
+      b.style.borderColor = active ? 'var(--navy)' : 'var(--border)';
+    });
     document.getElementById('imageLayoutChoiceView').style.display = 'none';
     document.getElementById('imageLayoutSlotsView').style.display = '';
     document.getElementById('imageLayoutTitle').textContent = layout + ' images en diaporama';
@@ -2648,6 +2714,16 @@ function chooseSizedImageLayout(sizeClass) {
   const input = document.getElementById('fInlineImageInput');
   input.removeAttribute('multiple');
   input.click();
+}
+
+function setDiapoSize(size, btn) {
+  pendingDiapoSize = size;
+  document.querySelectorAll('.diapo-size-tab').forEach(b => {
+    const active = b === btn;
+    b.style.background = active ? 'var(--navy)' : 'transparent';
+    b.style.color = active ? '#fff' : 'var(--txt-muted)';
+    b.style.borderColor = active ? 'var(--navy)' : 'var(--border)';
+  });
 }
 
 // ── Vue "slots" pour layouts 2/3 colonnes ──────
@@ -2681,7 +2757,9 @@ function renderImageSlots() {
 function pickImageForSlot(index) {
   activeSlotIndex = index;
   const input = document.getElementById('fInlineImageInput');
-  input.removeAttribute('multiple');
+  // Permettre la sélection multiple : les images supplémentaires rempliront
+  // les slots suivants (ou de nouveaux slots seront créés si besoin).
+  input.setAttribute('multiple', 'multiple');
   input.click();
 }
 
@@ -2710,14 +2788,15 @@ function confirmImageSlots() {
     const capHTML = cap
       ? `<div class="img-row-caption" contenteditable="true" data-placeholder="Légende…">${cap}</div>`
       : `<div class="img-row-caption" contenteditable="true" data-placeholder="Légende…"></div>`;
-    return `<div class="img-row-cell">${'<img src="'+s.dataUrl+'" alt="" />'}${capHTML}</div>`;
+    return `<div class="img-row-cell">${capHTML}${'<img src="'+s.dataUrl+'" alt="" />'}</div>`;
   }).join('');
   const arrows = filled.length > 1 ? `
       <button type="button" class="img-row-arrow prev" disabled onclick="imgRowNav(this,-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button type="button" class="img-row-arrow next" onclick="imgRowNav(this,1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>` : '';
   const dots = filled.length > 1 ? `
       <div class="img-row-dots">${filled.map((_, i) => `<button type="button" class="img-row-dot${i === 0 ? ' active' : ''}" onclick="imgRowGoTo(this,${i})"></button>`).join('')}</div>` : '';
-  const html = `<div class="img-row" contenteditable="false" data-index="0"><div class="img-row-track">${slides}</div>${arrows}${dots}</div><p><br></p>`;
+  const sizeClass = pendingDiapoSize && pendingDiapoSize !== 'full' ? ' img-row-'+pendingDiapoSize : '';
+  const html = `<div class="img-row${sizeClass}" contenteditable="false" data-index="0"><div class="img-row-track">${slides}</div>${arrows}${dots}</div><p><br></p>`;
   insertHtmlInEditor(html);
   closeImageLayoutModal();
 }
@@ -2788,6 +2867,14 @@ function initImgRowAutoplay(container) {
 // la rédaction ne s'ouvre plus tard sur une image autre que la première)
 function resetImgRowCarousels(container) {
   if (!container) return;
+  // Réordonner : s'assurer que la légende est AVANT l'image dans chaque cellule
+  container.querySelectorAll('.img-row-cell').forEach(cell => {
+    const img = cell.querySelector('img');
+    const caption = cell.querySelector('.img-row-caption');
+    if (img && caption && cell.firstElementChild !== caption) {
+      cell.insertBefore(caption, img);
+    }
+  });
   container.querySelectorAll('.img-row').forEach(root => {
     imgRowSetIndex(root, 0);
   });
@@ -2826,10 +2913,68 @@ function suggestCaptionFromFilename(filename) {
 }
 
 function handleInlineImageChange(e) {
-  const files = Array.from(e.target.files || []);
+  const files = Array.from(e.target.files || []).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
   if (!files.length) return;
-  const file = files[0];
-  if (!file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); e.target.value = ''; return; }
+
+  const slotsViewOpen = document.getElementById('imageLayoutSlotsView') &&
+    document.getElementById('imageLayoutSlotsView').style.display !== 'none';
+
+  if (slotsViewOpen && files.length > 1) {
+    // Sélection multiple dans la vue diaporama :
+    // remplir les slots à partir de activeSlotIndex (ou du premier slot vide)
+    // et créer de nouveaux slots si nécessaire.
+    let startIndex = activeSlotIndex !== null ? activeSlotIndex : imageSlots.findIndex(s => !s.dataUrl);
+    if (startIndex === -1) startIndex = imageSlots.length;
+
+    // S'assurer qu'on a assez de slots
+    while (imageSlots.length < startIndex + files.length) {
+      imageSlots.push({ dataUrl: null });
+    }
+
+    let processed = 0;
+    const suggestedCaptions = {}; // slotIdx -> légende suggérée (slots qui étaient vides)
+    files.forEach((file, offset) => {
+      const slotIdx = startIndex + offset;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        imageSlots[slotIdx].dataUrl = ev.target.result;
+        // Suggestion de légende si le slot est vide
+        if (!imageSlots[slotIdx].caption) {
+          const suggested = suggestCaptionFromFilename(file.name);
+          if (suggested) suggestedCaptions[slotIdx] = suggested;
+        }
+        processed++;
+        if (processed === files.length) {
+          activeSlotIndex = null;
+          renderImageSlots();
+          // Appliquer les légendes suggérées APRÈS le rendu : renderImageSlots()
+          // resynchronise imageSlots[i].caption depuis les champs affichés à
+          // l'écran (encore vides), donc une légende posée avant le rendu serait
+          // immédiatement écrasée. On l'applique ici, une fois les champs créés.
+          Object.keys(suggestedCaptions).forEach(idxStr => {
+            const idx = parseInt(idxStr, 10);
+            imageSlots[idx].caption = suggestedCaptions[idx];
+            const inp = document.querySelector('.img-slot-caption-input[data-index="' + idx + '"]');
+            if (inp) inp.value = suggestedCaptions[idx];
+          });
+          document.getElementById('imageLayoutTitle').textContent = imageSlots.filter(s => s.dataUrl).length + ' images en diaporama';
+          showToast(files.length + ' images ajoutées.', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  } else {
+    // Fichier unique (ou hors vue diaporama) : comportement original
+    processInlineImageFile(files[0]);
+  }
+
+  e.target.value = '';
+}
+
+// ── Traitement d'un fichier image, qu'il vienne d'un <input type="file">
+// ou d'un collage (Ctrl+V) depuis le presse-papiers ────────────────────
+function processInlineImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) { showToast('Veuillez choisir un fichier image.', 'error'); return; }
 
   const reader = new FileReader();
   reader.onload = ev => {
@@ -2851,7 +2996,6 @@ function handleInlineImageChange(e) {
         const inp2 = document.querySelector('.img-slot-caption-input[data-index="' + slotIdx + '"]');
         if (inp2) { inp2.value = suggested; imageSlots[slotIdx].caption = suggested; }
       }
-      e.target.value = '';
       return;
     }
 
@@ -2873,8 +3017,88 @@ function handleInlineImageChange(e) {
     updateGhostPlaceholders();
   };
   reader.readAsDataURL(file);
-  e.target.value = '';
 }
+
+// ── COLLER UNE OU PLUSIEURS IMAGES (Ctrl+V) DANS LA MODALE D'INSERTION ──
+// Permet de coller des images copiées (capture d'écran, image copiée
+// depuis un autre site, etc.) directement dans le diaporama ou les
+// autres types d'insertion d'image, sans passer par l'explorateur.
+document.addEventListener('paste', function (e) {
+  const modal = document.getElementById('imageLayoutModal');
+  if (!modal || !modal.classList.contains('open')) return;
+
+  const items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+  if (!items) return;
+
+  // Récupérer TOUTES les images du presse-papiers (peut en contenir plusieurs)
+  const imageFiles = [];
+  for (const item of items) {
+    if (item.type && item.type.indexOf('image') !== -1) {
+      const f = item.getAsFile();
+      if (f) imageFiles.push(f);
+    }
+  }
+  if (!imageFiles.length) return; // pas d'image dans le presse-papiers
+
+  e.preventDefault();
+
+  const slotsViewOpen = document.getElementById('imageLayoutSlotsView') &&
+    document.getElementById('imageLayoutSlotsView').style.display !== 'none';
+
+  if (slotsViewOpen && imageFiles.length > 0) {
+    // Déterminer le slot de départ
+    let startIndex = activeSlotIndex !== null ? activeSlotIndex : imageSlots.findIndex(s => !s.dataUrl);
+    if (startIndex === -1) startIndex = imageSlots.length;
+
+    // Créer les slots manquants
+    while (imageSlots.length < startIndex + imageFiles.length) {
+      imageSlots.push({ dataUrl: null });
+    }
+
+    let processed = 0;
+    const suggestedCaptions = {}; // slotIdx -> légende suggérée (slots qui étaient vides)
+    imageFiles.forEach((file, offset) => {
+      const slotIdx = startIndex + offset;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        imageSlots[slotIdx].dataUrl = ev.target.result;
+        if (!imageSlots[slotIdx].caption) {
+          const suggested = suggestCaptionFromFilename(file.name || '');
+          if (suggested) suggestedCaptions[slotIdx] = suggested;
+        }
+        processed++;
+        if (processed === imageFiles.length) {
+          activeSlotIndex = null;
+          renderImageSlots();
+          // Appliquer les légendes suggérées APRÈS le rendu (voir explication
+          // dans handleInlineImageChange) pour qu'elles ne soient pas écrasées.
+          Object.keys(suggestedCaptions).forEach(idxStr => {
+            const idx = parseInt(idxStr, 10);
+            imageSlots[idx].caption = suggestedCaptions[idx];
+            const inp = document.querySelector('.img-slot-caption-input[data-index="' + idx + '"]');
+            if (inp) inp.value = suggestedCaptions[idx];
+          });
+          document.getElementById('imageLayoutTitle').textContent = imageSlots.filter(s => s.dataUrl).length + ' images en diaporama';
+          showToast(imageFiles.length > 1 ? imageFiles.length + ' images collées.' : 'Image collée avec succès.', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  } else {
+    // Hors vue diaporama ou une seule image : comportement original
+    if (activeSlotIndex === null && slotsViewOpen) {
+      let targetIndex = imageSlots.findIndex(s => !s.dataUrl);
+      if (targetIndex === -1) {
+        imageSlots.push({ dataUrl: null });
+        targetIndex = imageSlots.length - 1;
+        renderImageSlots();
+      }
+      activeSlotIndex = targetIndex;
+    }
+    processInlineImageFile(imageFiles[0]);
+    showToast('Image collée avec succès.', 'success');
+  }
+});
 
 
 // ── REDIMENSIONNEMENT DES IMAGES SIMPLES ──────
@@ -2887,12 +3111,62 @@ function isResizableImage(img) {
   return img.tagName === 'IMG' && !img.closest('.img-row') && !img.closest('.img-text-media');
 }
 
+// ── REDIMENSIONNEMENT DES DIAPORAMAS ──────────
+let selectedDiapoRow = null;
+const DIAPO_SIZE_CLASSES = ['img-row-small', 'img-row-medium', 'img-row-large', 'img-row-full'];
+
+function selectDiapoForResize(row) {
+  deselectDiapoRow();
+  deselectResizableImage();
+  selectedDiapoRow = row;
+  row.style.outline = '2px solid var(--blue)';
+
+  const toolbar = document.getElementById('diapoSizeToolbar');
+  const container = document.getElementById('fContent');
+  const containerRect = container.getBoundingClientRect();
+  const rowRect = row.getBoundingClientRect();
+
+  toolbar.style.top = (row.offsetTop) + 'px';
+  toolbar.style.left = Math.max(0, rowRect.left - containerRect.left) + 'px';
+  toolbar.classList.add('open');
+
+  const currentSize = DIAPO_SIZE_CLASSES.find(c => row.classList.contains(c)) || 'img-row-full';
+  toolbar.querySelectorAll('button').forEach(btn => {
+    btn.classList.toggle('active', 'img-row-' + btn.dataset.size === currentSize);
+  });
+}
+
+function deselectDiapoRow() {
+  if (selectedDiapoRow) selectedDiapoRow.style.outline = '';
+  selectedDiapoRow = null;
+  document.getElementById('diapoSizeToolbar').classList.remove('open');
+}
+
+function setDiapoRowSize(size) {
+  if (!selectedDiapoRow) return;
+  DIAPO_SIZE_CLASSES.forEach(c => selectedDiapoRow.classList.remove(c));
+  if (size !== 'full') selectedDiapoRow.classList.add('img-row-' + size);
+  document.getElementById('diapoSizeToolbar').querySelectorAll('button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.size === size);
+  });
+  updateCharCount();
+}
+
 document.getElementById('fContent').addEventListener('click', function(e) {
+  const imgRow = e.target.closest('.img-row');
   const img = e.target.closest('img');
-  if (img && isResizableImage(img)) {
+
+  // Clic sur un bouton du diaporama (flèches, dots) → ignorer
+  if (e.target.closest('.img-row-arrow') || e.target.closest('.img-row-dot')) return;
+
+  if (imgRow) {
+    selectDiapoForResize(imgRow);
+  } else if (img && isResizableImage(img)) {
+    deselectDiapoRow();
     selectImageForResize(img);
   } else {
     deselectResizableImage();
+    deselectDiapoRow();
   }
 });
 
@@ -2936,6 +3210,9 @@ function setImageSize(size) {
 document.addEventListener('click', function(e) {
   if (!e.target.closest('#fContent') && !e.target.closest('#imgSizeToolbar')) {
     deselectResizableImage();
+  }
+  if (!e.target.closest('#fContent') && !e.target.closest('#diapoSizeToolbar')) {
+    deselectDiapoRow();
   }
 });
 
