@@ -3436,10 +3436,16 @@ function syncMobileAdminMenu() {
     }
   }
 
+  function hideAll() {
+    quotes.forEach(q => {
+      q.classList.remove('slide-in', 'slide-mid', 'slide-out');
+    });
+  }
+
   function showQuote(i) {
     currentIdx = i;
+    hideAll(); // garantit qu'aucune autre citation n'est visible
     const q = quotes[i];
-    q.classList.remove('slide-mid', 'slide-out');
     q.classList.add('slide-in');
 
     midTimer = setTimeout(() => {
