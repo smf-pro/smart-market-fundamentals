@@ -864,11 +864,11 @@
           </div>
           <div class="form-row">
             <label class="form-label">Date de publication</label>
-            <input class="form-input" type="date" id="fDate" />
+            <input class="form-input" type="date" id="fDate" onchange="suggestArticleTitle()" />
           </div>
           <div class="form-row">
             <label class="form-label">Catégorie principale</label>
-            <select class="form-select" id="fCategory">
+            <select class="form-select" id="fCategory" onchange="suggestArticleTitle()">
               <option value="blue|Analyse Fondamentale">Analyse Fondamentale</option>
               <option value="amber|Analyse Technique">Analyse Technique</option>
             </select>
@@ -1748,6 +1748,34 @@ function isoToFrDate(iso) {
   return `${d} ${FR_MONTHS[m - 1]} ${y}`;
 }
 
+const FR_DAYS = ['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'];
+const FR_MONTHS_UPPER = ['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
+
+function suggestArticleTitle() {
+  const titleInput = document.getElementById('fTitle');
+  const dateVal = document.getElementById('fDate').value;
+  const catVal = document.getElementById('fCategory').value;
+
+  // Ne suggère que si le titre est encore vide ou déjà une suggestion précédente
+  if (!dateVal || !catVal) return;
+
+  const [y, m, d] = dateVal.split('-').map(Number);
+  if (!y || !m || !d) return;
+
+  const catLabel = getCatLabel(catVal).toUpperCase();
+  const date = new Date(y, m - 1, d);
+  const dayName = FR_DAYS[date.getDay()];
+  const monthName = FR_MONTHS_UPPER[m - 1];
+  const suggested = `${catLabel} : ${dayName} ${d} ${monthName} ${y}`;
+
+  // N'écrase que si le champ est vide ou contient déjà une suggestion auto
+  const current = titleInput.value.trim();
+  if (current === '' || titleInput.dataset.suggested === current) {
+    titleInput.value = suggested;
+    titleInput.dataset.suggested = suggested;
+  }
+}
+
 function frDateToISO(fr) {
   if (!fr) return '';
   const parts = fr.trim().split(' ');
@@ -1951,6 +1979,11 @@ function showToast(msg, type='success') {
 // ── OPEN ARTICLE PAGE ────────────────────────
 function openArticleNewTab(id, e) {
   if (e) e.stopPropagation();
+  // Si on est déjà sur une page article (onglet dédié), ouvrir dans le même onglet
+  if (new URLSearchParams(window.location.search).has('article')) {
+    openArticle(id);
+    return;
+  }
   const url = new URL(window.location.href);
   url.searchParams.set('article', id);
   window.open(url.toString(), '_blank');
