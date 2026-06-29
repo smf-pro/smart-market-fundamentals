@@ -1638,18 +1638,25 @@ function clearSessionTimer() {
   }
 }
 
+function applyAdminUI() {
+  document.getElementById('adminBar').style.display = 'block';
+  document.getElementById('navActions').innerHTML = `<span class="admin-badge">● Admin</span><button class="btn btn-primary" style="background:#1A7A4A" onclick="openNewArticleModal()">+ Publier</button><button class="btn btn-ghost" onclick="doLogout()">Déconnexion</button>`;
+  document.getElementById('footerEditBtn').style.display = 'inline-block';
+  renderAll();
+  syncMobileAdminMenu();
+}
+
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
   const err = document.getElementById('loginError');
   if (u === ADMIN_USER && p === ADMIN_PASS) {
     isAdmin = true;
+    // Persister la session pour les nouveaux onglets
+    const expiresAt = Date.now() + SESSION_DURATION;
+    localStorage.setItem('smf_admin_session', JSON.stringify({ expiresAt }));
     closeLoginModal();
-    document.getElementById('adminBar').style.display = 'block';
-    document.getElementById('navActions').innerHTML = `<span class="admin-badge">● Admin</span><button class="btn btn-primary" style="background:#1A7A4A" onclick="openNewArticleModal()">+ Publier</button><button class="btn btn-ghost" onclick="doLogout()">Déconnexion</button>`;
-    document.getElementById('footerEditBtn').style.display = 'inline-block';
-    renderAll();
-    syncMobileAdminMenu();
+    applyAdminUI();
     startSessionTimer(); // ← Démarre le minuteur d'1 heure
     showToast('Bienvenue ! Vous êtes connecté en tant qu\'admin.', 'success');
   } else {
@@ -1661,6 +1668,7 @@ function doLogin() {
 
 function doLogout(auto) {
   clearSessionTimer(); // ← Annule le minuteur s'il est encore actif
+  localStorage.removeItem('smf_admin_session');
   isAdmin = false;
   document.getElementById('adminBar').style.display = 'none';
   document.getElementById('navActions').innerHTML = `<button class="btn btn-ghost" onclick="openLoginModal()">Se connecter</button><button class="btn btn-primary">S'abonner</button>`;
@@ -1672,6 +1680,23 @@ function doLogout(auto) {
     : 'Vous avez été déconnecté.';
   showToast(msg, auto ? 'warning' : 'success');
 }
+
+// ── RESTAURATION DE SESSION (nouvel onglet) ────
+(function restoreAdminSession() {
+  try {
+    const raw = localStorage.getItem('smf_admin_session');
+    if (!raw) return;
+    const { expiresAt } = JSON.parse(raw);
+    const remaining = expiresAt - Date.now();
+    if (remaining <= 0) {
+      localStorage.removeItem('smf_admin_session');
+      return;
+    }
+    isAdmin = true;
+    // Recaler le timer sur le temps restant exact
+    _sessionTimer = setTimeout(() => doLogout(true), remaining);
+  } catch (e) { /* session corrompue, ignorer */ }
+})();
 
 // ── PIED DE PAGE (paramètres) ─────────────────
 const DEFAULT_FOOTER_DESC = "La référence indépendante pour la recherche et l'analyse financière en langue française. Rapports sectoriels, analyses macro et études de marché par des professionnels certifiés.";
@@ -3457,6 +3482,8 @@ function syncMobileAdminMenu() {
 })();
 
 // ── INIT ──────────────────────────────────────
+// Si une session admin a été restaurée depuis sessionStorage, appliquer l'UI
+if (isAdmin) applyAdminUI();
 renderAll();
 
 // Appliquer le filtre selon le hash de l'URL (ex: #forex, #analyse-trades)
