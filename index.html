@@ -252,6 +252,7 @@
   .toast-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .toast-success { background: var(--green); }
   .toast-error { background: var(--red); }
+  .toast-warning { background: var(--amber); }
 
   /* Empty state */
   .empty-state { text-align: center; padding: 48px 24px; color: var(--txt-muted); }
@@ -290,9 +291,9 @@
   .back-btn:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-lt); }
   .art-page-header { margin-bottom: 32px; }
   .art-page-tabs { display: none; } /* désactivé — remplacé par accordéon */
-  .art-accordion { margin-top: 12px; margin-bottom: 32px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-  .art-acc-item { border-bottom: 1px solid var(--border); }
-  .art-acc-item:last-child { border-bottom: none; }
+  .art-accordion { margin-top: 12px; margin-bottom: 32px; }
+  .art-acc-item { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 10px; }
+  .art-acc-item:last-child { margin-bottom: 0; }
   .art-acc-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; cursor: pointer; background: var(--surface); transition: background 0.12s; user-select: none; }
   .art-acc-header:hover { background: var(--blue-lt); }
   .art-acc-header.open { background: var(--navy); }
@@ -412,19 +413,55 @@
   .editor-sep-label[contenteditable="false"] { user-select: none; cursor: default; }
   #fContent:empty::before { content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none; }
 
-  /* Groupes d'images côte à côte */
-  .img-row { display: flex; gap: 10px; margin: 14px 0; }
-  #fContent .img-row img, .art-page-body .img-row img { flex: 1; min-width: 0; max-width: 100%; height: auto; border-radius: var(--radius); display: block; margin: 0; object-fit: cover; }
-  .img-row .img-row-spacer { flex: 1; min-width: 0; }
-  /* Sur la page article, les images côte à côte débordent pour occuper toute la largeur */
+  /* Groupes d'images en diaporama (transition "Push") */
+  .img-row { position: relative; margin: 14px 0; overflow: hidden; border-radius: var(--radius); background: #00000006; }
+  .img-row-track { display: flex; width: 100%; transition: transform 0.5s cubic-bezier(0.65,0,0.35,1); }
+  .img-row-cell { flex: 0 0 100%; min-width: 0; display: flex; flex-direction: column; gap: 0; }
+  .img-row-cell img { width: 100%; height: auto; display: block; margin: 0; object-fit: cover; }
+  .img-row-caption {
+    font-size: 12px; color: var(--txt-faint); text-align: center;
+    padding: 8px 6px 0; line-height: 1.4; font-style: italic;
+    min-height: 20px;
+  }
+  /* Éditeur : légende éditable */
+  #fContent .img-row-caption {
+    border: none; outline: none; background: transparent;
+    display: block; width: 100%; font-family: var(--sans);
+    cursor: text; border-bottom: 1px dashed var(--border);
+  }
+  #fContent .img-row-caption:empty::before {
+    content: attr(data-placeholder); color: var(--txt-faint); pointer-events: none;
+  }
+  #fContent .img-row-caption:focus { border-bottom-color: var(--blue); color: var(--txt); font-style: normal; }
+  /* Flèches de navigation du diaporama */
+  .img-row-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(13,34,64,0.55); display: flex; align-items: center;
+    justify-content: center; transition: background 0.15s, opacity 0.15s; backdrop-filter: blur(2px);
+  }
+  .img-row-arrow:hover { background: rgba(13,34,64,0.85); }
+  .img-row-arrow svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.4; }
+  .img-row-arrow.prev { left: 10px; }
+  .img-row-arrow.next { right: 10px; }
+  .img-row-arrow[disabled] { opacity: 0; pointer-events: none; }
+  /* Pastilles de pagination */
+  .img-row-dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 6px; z-index: 2; }
+  .img-row-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.55); border: none; cursor: pointer; padding: 0; transition: background 0.15s, transform 0.15s; }
+  .img-row-dot.active { background: #fff; transform: scale(1.3); }
+  /* Sur la page article, le diaporama déborde pour occuper toute la largeur */
   .art-page-body .img-row {
     margin: 24px -24px;
     width: calc(100% + 48px);
-    gap: 6px;
+    border-radius: 0;
   }
-  .art-page-body .img-row img {
-    aspect-ratio: 4/3;
+  .art-page-body .img-row-cell img {
+    aspect-ratio: 16/9;
     object-fit: cover;
+  }
+  .art-page-body .img-row-caption {
+    padding: 8px 24px 0;
+    font-size: 12px;
   }
 
   /* Image + texte côte à côte */
@@ -469,8 +506,9 @@
   .img-layout-label { font-size: 12px; font-weight: 500; color: var(--txt-muted); }
 
   /* Slots d'upload individuels */
-  .img-slots-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .img-slot { flex: 1; min-width: 0; aspect-ratio: 1; border: 1.5px dashed var(--border-md); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: var(--bg); transition: border-color 0.12s, background 0.12s; }
+  .img-slots-row { display: flex; gap: 10px; margin-bottom: 16px; align-items: flex-start; }
+  .img-slot-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .img-slot { width: 100%; aspect-ratio: 1; border: 1.5px dashed var(--border-md); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: var(--bg); transition: border-color 0.12s, background 0.12s; }
   .img-slot:hover { border-color: var(--blue); background: var(--blue-lt); }
   .img-slot.filled { border-style: solid; border-color: var(--border); }
   .img-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -478,6 +516,9 @@
   .img-slot-empty svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; }
   .img-slot-remove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; border: none; font-size: 13px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .img-slot-remove:hover { background: rgba(0,0,0,0.8); }
+  .img-slot-caption-input { width: 100%; font-family: var(--sans); font-size: 12px; padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--txt); outline: none; transition: border-color 0.15s; }
+  .img-slot-caption-input:focus { border-color: var(--blue); }
+  .img-slot-caption-input::placeholder { color: var(--txt-faint); font-style: italic; }
   .img-slots-actions { display: flex; justify-content: flex-end; gap: 8px; }
   .char-count { font-size: 11px; color: var(--txt-faint); text-align: right; margin-top: 4px; }
 
@@ -748,7 +789,9 @@
         <button class="modal-close" onclick="closeArticleModal()">×</button>
       </div>
       <div class="editor-toolbar editor-toolbar-head">
-        <!-- Police -->
+        <!-- Bouton SMF : format standard -->
+        <button type="button" class="editor-btn editor-btn-dark" title="Format SMF : Times New Roman, taille moyenne, interligne 1.0, espacement petit" onclick="applySmfFormat()" style="font-family:'Times New Roman',serif;font-weight:700;letter-spacing:-0.5px;color:#C8DAEF;min-width:22px">S</button>
+        <div class="editor-sep editor-sep-dark"></div>
         <div class="editor-dd-wrap">
           <button type="button" class="editor-btn editor-btn-dark editor-dd-trigger" title="Police" onclick="toggleEditorDD('ddFont',event)">𝐹</button>
           <div class="editor-dd" id="ddFont">
@@ -892,24 +935,6 @@
             <label class="form-label">Page / Tag secondaire (optionnel)</label>
             <select class="form-select" id="fTag2" onchange="switchEditorPage(this.value)">
               <option value="">— Page principale —</option>
-              <optgroup label="── Devises ──">
-              <option value="green|USD">USD</option>
-              <option value="red|CAD">CAD</option>
-              <option value="blue|EUR">EUR</option>
-              <option value="navy|GBP">GBP</option>
-              <option value="amber|CHF">CHF</option>
-              <option value="green|JPY">JPY</option>
-              <option value="red|AUD">AUD</option>
-              <option value="blue|NZD">NZD</option>
-              </optgroup>
-              <optgroup label="── Jours ──">
-              <option value="navy|WEEK AHEAD">WEEK AHEAD</option>
-              <option value="blue|LUNDI">LUNDI</option>
-              <option value="blue|MARDI">MARDI</option>
-              <option value="blue|MERCREDI">MERCREDI</option>
-              <option value="blue|JEUDI">JEUDI</option>
-              <option value="blue|VENDREDI">VENDREDI</option>
-              </optgroup>
             </select>
             <div style="font-size:11px;color:var(--txt-faint);margin-top:6px">Le titre, le sous-titre et l'image restent identiques. Seul le contenu change selon la page (tag) sélectionnée.</div>
             <div style="display:flex;gap:6px;margin-top:10px">
@@ -960,7 +985,7 @@
     </div>
     <div class="modal-body">
       <div id="imageLayoutChoiceView">
-        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Choisissez combien d'images afficher côte à côte. Une fois insérée, cliquez sur une image seule pour ajuster sa taille (petite, moyenne, large, pleine largeur).</p>
+        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Choisissez combien d'images inclure dans le diaporama (effet Push : chaque image pousse la précédente hors de l'écran). Une fois inséré, cliquez sur une image seule pour ajuster sa taille (petite, moyenne, large, pleine largeur).</p>
         <div class="img-layout-grid">
           <button type="button" class="img-layout-opt img-layout-opt-wide" onclick="chooseImageLayout('sized')">
             <div class="img-layout-preview img-layout-preview-sized">
@@ -977,11 +1002,19 @@
           </button>
           <button type="button" class="img-layout-opt" onclick="chooseImageLayout(2)">
             <div class="img-layout-preview"><span></span><span></span></div>
-            <span class="img-layout-label">2 côte à côte</span>
+            <span class="img-layout-label">2 en diaporama</span>
           </button>
           <button type="button" class="img-layout-opt" onclick="chooseImageLayout(3)">
             <div class="img-layout-preview"><span></span><span></span><span></span></div>
-            <span class="img-layout-label">3 côte à côte</span>
+            <span class="img-layout-label">3 en diaporama</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(4)">
+            <div class="img-layout-preview" style="gap:2px"><span></span><span></span><span></span><span></span></div>
+            <span class="img-layout-label">4 en diaporama</span>
+          </button>
+          <button type="button" class="img-layout-opt" onclick="chooseImageLayout(5)">
+            <div class="img-layout-preview" style="gap:2px"><span></span><span></span><span></span><span></span><span></span></div>
+            <span class="img-layout-label">5 en diaporama</span>
           </button>
           <button type="button" class="img-layout-opt" onclick="chooseImageLayout('text-left')">
             <div class="img-layout-preview"><span></span><span class="img-layout-text"></span></div>
@@ -1020,7 +1053,7 @@
         </div>
       </div>
       <div id="imageLayoutSlotsView" style="display:none">
-        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Cliquez sur chaque emplacement à remplir. Laissez vide les emplacements que vous ne voulez pas utiliser (ex: pour centrer une seule image).</p>
+        <p style="font-size:13px;color:var(--txt-muted);margin-bottom:14px">Cliquez sur chaque emplacement pour uploader une image. Ajoutez une légende optionnelle sous chaque slot. Laissez un emplacement vide pour ne pas l'utiliser.</p>
         <div class="img-slots-row" id="imageSlotsRow"></div>
         <div class="img-slots-actions">
           <button type="button" class="btn btn-ghost" onclick="backToImageLayoutChoice()">← Retour</button>
@@ -1558,6 +1591,24 @@ function closeLoginModal() {
   document.getElementById('loginModal').classList.remove('open');
 }
 
+// Timer de session admin (déconnexion automatique après 1 heure)
+let _sessionTimer = null;
+const SESSION_DURATION = 60 * 60 * 1000; // 1 heure en millisecondes
+
+function startSessionTimer() {
+  clearSessionTimer();
+  _sessionTimer = setTimeout(() => {
+    doLogout(true); // true = déconnexion automatique
+  }, SESSION_DURATION);
+}
+
+function clearSessionTimer() {
+  if (_sessionTimer) {
+    clearTimeout(_sessionTimer);
+    _sessionTimer = null;
+  }
+}
+
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
@@ -1570,6 +1621,7 @@ function doLogin() {
     document.getElementById('footerEditBtn').style.display = 'inline-block';
     renderAll();
     syncMobileAdminMenu();
+    startSessionTimer(); // ← Démarre le minuteur d'1 heure
     showToast('Bienvenue ! Vous êtes connecté en tant qu\'admin.', 'success');
   } else {
     err.style.display = 'block';
@@ -1578,14 +1630,18 @@ function doLogin() {
   }
 }
 
-function doLogout() {
+function doLogout(auto) {
+  clearSessionTimer(); // ← Annule le minuteur s'il est encore actif
   isAdmin = false;
   document.getElementById('adminBar').style.display = 'none';
   document.getElementById('navActions').innerHTML = `<button class="btn btn-ghost" onclick="openLoginModal()">Se connecter</button><button class="btn btn-primary">S'abonner</button>`;
   document.getElementById('footerEditBtn').style.display = 'none';
   renderAll();
   syncMobileAdminMenu();
-  showToast('Vous avez été déconnecté.', 'success');
+  const msg = auto
+    ? 'Session expirée. Vous avez été déconnecté après 1 heure.'
+    : 'Vous avez été déconnecté.';
+  showToast(msg, auto ? 'warning' : 'success');
 }
 
 // ── PIED DE PAGE (paramètres) ─────────────────
@@ -1630,26 +1686,7 @@ async function saveFooterSettings() {
 // ── ARTICLE MODAL ─────────────────────────────
 function resetTag2Options() {
   const select = document.getElementById('fTag2');
-  select.innerHTML = `
-    <option value="">— Page principale —</option>
-    <optgroup label="── Devises ──">
-    <option value="green|USD">USD</option>
-    <option value="red|CAD">CAD</option>
-    <option value="blue|EUR">EUR</option>
-    <option value="navy|GBP">GBP</option>
-    <option value="amber|CHF">CHF</option>
-    <option value="green|JPY">JPY</option>
-    <option value="red|AUD">AUD</option>
-    <option value="blue|NZD">NZD</option>
-    </optgroup>
-    <optgroup label="── Jours ──">
-    <option value="navy|WEEK AHEAD">WEEK AHEAD</option>
-    <option value="blue|LUNDI">LUNDI</option>
-    <option value="blue|MARDI">MARDI</option>
-    <option value="blue|MERCREDI">MERCREDI</option>
-    <option value="blue|JEUDI">JEUDI</option>
-    <option value="blue|VENDREDI">VENDREDI</option>
-    </optgroup>`;
+  select.innerHTML = `<option value="">— Page principale —</option>`;
 }
 
 function addPageOptionsFromPages(pages) {
@@ -1674,7 +1711,7 @@ function openNewArticleModal() {
   document.getElementById('fExcerpt').value = '';
   document.getElementById('fAuthor').value = '';
   document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('fCategory').value = 'blue|Analyse Fondamentale';
+  document.getElementById('fCategory').selectedIndex = -1;
   resetTag2Options();
   document.getElementById('fTag2').value = '';
   document.getElementById('fNewPageName').value = '';
@@ -1689,7 +1726,7 @@ function openNewArticleModal() {
 }
 
 function openEditModal(id, e) {
-  if (e) e.stopPropagation();
+  if (e) { e.stopPropagation(); e.preventDefault(); }
   const a = articles.find(x => x.id === id);
   if (!a) return;
   editingId = id;
@@ -1708,6 +1745,7 @@ function openEditModal(id, e) {
   document.getElementById('fNewPageName').value = '';
   document.getElementById('fFeatured').checked = !!a.featured;
   document.getElementById('fContent').innerHTML = a.content || '';
+  resetImgRowCarousels(document.getElementById('fContent'));
   updateGhostPlaceholders();
   savedEditorRange = null;
   currentCoverImage = a.coverImage || '';
@@ -1732,6 +1770,7 @@ function switchEditorPage(newTag) {
   // Charger le contenu de la nouvelle page (ou page principale)
   currentPageTag = newTag;
   document.getElementById('fContent').innerHTML = editingPages[newTag] || '';
+  resetImgRowCarousels(document.getElementById('fContent'));
   updateGhostPlaceholders();
   savedEditorRange = null;
   updateCharCount();
@@ -1905,7 +1944,7 @@ async function saveArticle() {
 
 // ── DELETE ────────────────────────────────────
 function openDeleteModal(id, e) {
-  if (e) e.stopPropagation();
+  if (e) { e.stopPropagation(); e.preventDefault(); }
   deletingId = id;
   const a = articles.find(x => x.id === id);
   document.getElementById('deleteTitle').textContent = a?.title || '';
@@ -1962,6 +2001,12 @@ function filterCat(el, cat, e, skipPush) {
     articlePageEl.style.display = 'none';
     homePageEl.style.display = 'block';
     currentArticleId = null;
+    // Nettoyer le paramètre ?article= laissé par la page article
+    const cleanUrl = new URL(window.location.href);
+    if (cleanUrl.searchParams.has('article')) {
+      cleanUrl.searchParams.delete('article');
+      history.replaceState(history.state, '', cleanUrl.toString());
+    }
   }
 
   if (!skipPush) {
@@ -1999,15 +2044,14 @@ function showToast(msg, type='success') {
 
 // ── OPEN ARTICLE PAGE ────────────────────────
 function openArticleNewTab(id, e) {
-  if (e) e.stopPropagation();
-  // Si on est déjà sur une page article (onglet dédié), ouvrir dans le même onglet
-  if (new URLSearchParams(window.location.search).has('article')) {
-    openArticle(id);
+  // Clic molette / Ctrl+clic / Cmd+clic : laisser le navigateur ouvrir
+  // le lien nativement dans un nouvel onglet (via le href de la carte).
+  if (e && (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1)) {
     return;
   }
-  const url = new URL(window.location.href);
-  url.searchParams.set('article', id);
-  window.open(url.toString(), '_blank');
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  // Clic normal : toujours ouvrir l'article dans la page actuelle.
+  openArticle(id);
 }
 
 function toggleAccordion(header) {
@@ -2052,7 +2096,7 @@ function renderArticlePageContent(id, pageTag) {
     <blockquote>${a.excerpt}</blockquote>`;
 
   // Ordre fixe des pages (même ordre que le sélecteur de l'éditeur)
-  const PAGE_ORDER = ['green|USD','red|CAD','blue|EUR','navy|GBP','amber|CHF','green|JPY','red|AUD','blue|NZD','navy|WEEK AHEAD','blue|LUNDI','blue|MARDI','blue|MERCREDI','blue|JEUDI','blue|VENDREDI'];
+  const PAGE_ORDER = [];
   // Onglets : Page principale + une par tag présent dans a.pages (aucun actif par défaut)
   // On exclut la catégorie principale (par valeur exacte ou par label) pour éviter le doublon.
   const mainCatLabel = getCatLabel(a.category).toLowerCase();
@@ -2113,6 +2157,9 @@ function renderArticlePageContent(id, pageTag) {
     </div>
     ${tabsHTML}
     ${accordionHTML}`;
+
+  resetImgRowCarousels(document.getElementById('articlePageContent'));
+  initImgRowAutoplay(document.getElementById('articlePageContent'));
 
   // Toujours appliquer le filtrage des sections dès l'ouverture : si une page
   // précise a été demandée (ex: depuis un lien) on l'affiche seule, sinon
@@ -2388,6 +2435,25 @@ function applyParagraphSpacing(value) {
   updateCharCount();
 }
 
+// ── FORMAT SMF (bouton "S") ────────────────────
+// Applique : Times New Roman, taille moyenne (fontSize 4),
+// interligne 1.0, espacement entre paragraphes petit (8px)
+function applySmfFormat() {
+  restoreEditorSelection();
+  // 1. Police Times New Roman
+  document.execCommand('fontName', false, "'Times New Roman',serif");
+  // 2. Taille moyenne (niveau 4 = ~15px)
+  document.execCommand('fontSize', false, '4');
+  // 3. Interligne 1.0 + espacement petit sur les blocs sélectionnés
+  const blocks = getSelectedBlocks();
+  blocks.forEach(el => {
+    el.style.lineHeight   = '1';
+    el.style.marginBottom = '8px';
+  });
+  saveEditorSelection();
+  updateCharCount();
+}
+
 // ── SÉLECTEUR DE COULEURS (style Word) ────────
 const THEME_COLOR_ROWS = [
   ['#FFFFFF','#000000','#A6A6A6','#5B7DA8','#ED7D31','#FFC000','#FFD966','#70AD47','#4472C4','#264478'],
@@ -2560,12 +2626,12 @@ function chooseImageLayout(layout) {
     document.getElementById('imageLayoutTitle').textContent = '1 image – taille au choix';
     return;
   }
-  if (layout === 2 || layout === 3) {
+  if (layout === 2 || layout === 3 || layout === 4 || layout === 5) {
     // Passer à la vue "slots" : upload individuel et optionnel par emplacement
     imageSlots = Array.from({ length: layout }, () => ({ dataUrl: null }));
     document.getElementById('imageLayoutChoiceView').style.display = 'none';
     document.getElementById('imageLayoutSlotsView').style.display = '';
-    document.getElementById('imageLayoutTitle').textContent = layout + ' images côte à côte';
+    document.getElementById('imageLayoutTitle').textContent = layout + ' images en diaporama';
     renderImageSlots();
     return;
   }
@@ -2587,18 +2653,27 @@ function chooseSizedImageLayout(sizeClass) {
 // ── Vue "slots" pour layouts 2/3 colonnes ──────
 function renderImageSlots() {
   const row = document.getElementById('imageSlotsRow');
+  // Sauvegarder les légendes actuelles avant de re-render
+  row.querySelectorAll('.img-slot-caption-input').forEach(inp => {
+    const idx = parseInt(inp.dataset.index);
+    if (!isNaN(idx)) imageSlots[idx].caption = inp.value;
+  });
   row.innerHTML = imageSlots.map((slot, i) => {
-    if (slot.dataUrl) {
-      return `<div class="img-slot filled">
-        <img src="${slot.dataUrl}" alt="" />
-        <button type="button" class="img-slot-remove" title="Retirer" onclick="removeImageSlot(${i}, event)">×</button>
-      </div>`;
-    }
-    return `<div class="img-slot" onclick="pickImageForSlot(${i})">
-      <div class="img-slot-empty">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <span>Choisir une image</span>
-      </div>
+    const captionVal = slot.caption || '';
+    const imgBlock = slot.dataUrl
+      ? `<div class="img-slot filled" onclick="pickImageForSlot(${i})">
+          <img src="${slot.dataUrl}" alt="" />
+          <button type="button" class="img-slot-remove" title="Retirer" onclick="removeImageSlot(${i}, event)">×</button>
+        </div>`
+      : `<div class="img-slot" onclick="pickImageForSlot(${i})">
+          <div class="img-slot-empty">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Choisir une image</span>
+          </div>
+        </div>`;
+    return `<div class="img-slot-wrap">
+      ${imgBlock}
+      <input type="text" class="img-slot-caption-input" data-index="${i}" placeholder="Légende…" value="${captionVal.replace(/"/g,'&quot;')}" oninput="imageSlots[${i}].caption=this.value" />
     </div>`;
   }).join('');
 }
@@ -2611,22 +2686,111 @@ function pickImageForSlot(index) {
 }
 
 function removeImageSlot(index, e) {
-  if (e) e.stopPropagation();
+  if (e) { e.stopPropagation(); e.preventDefault(); }
   imageSlots[index].dataUrl = null;
+  // Sauvegarder toutes les légendes avant re-render
+  document.querySelectorAll('.img-slot-caption-input').forEach(inp => {
+    const idx = parseInt(inp.dataset.index);
+    if (!isNaN(idx)) imageSlots[idx].caption = inp.value;
+  });
   renderImageSlots();
 }
 
 function confirmImageSlots() {
+  // Sauvegarder les légendes depuis les inputs avant de fermer
+  document.querySelectorAll('.img-slot-caption-input').forEach(inp => {
+    const idx = parseInt(inp.dataset.index);
+    if (!isNaN(idx)) imageSlots[idx].caption = inp.value;
+  });
   const filled = imageSlots.filter(s => s.dataUrl);
   if (!filled.length) { showToast('Choisissez au moins une image.', 'error'); return; }
   restoreEditorSelection();
-  const cells = imageSlots.map(s => s.dataUrl
-    ? `<img src="${s.dataUrl}" alt="" />`
-    : `<div class="img-row-spacer"></div>`
-  ).join('');
-  const html = `<div class="img-row" contenteditable="false">${cells}</div><p><br></p>`;
+  const slides = filled.map(s => {
+    const cap = (s.caption || '').trim();
+    const capHTML = cap
+      ? `<div class="img-row-caption" contenteditable="true" data-placeholder="Légende…">${cap}</div>`
+      : `<div class="img-row-caption" contenteditable="true" data-placeholder="Légende…"></div>`;
+    return `<div class="img-row-cell">${'<img src="'+s.dataUrl+'" alt="" />'}${capHTML}</div>`;
+  }).join('');
+  const arrows = filled.length > 1 ? `
+      <button type="button" class="img-row-arrow prev" disabled onclick="imgRowNav(this,-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button type="button" class="img-row-arrow next" onclick="imgRowNav(this,1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>` : '';
+  const dots = filled.length > 1 ? `
+      <div class="img-row-dots">${filled.map((_, i) => `<button type="button" class="img-row-dot${i === 0 ? ' active' : ''}" onclick="imgRowGoTo(this,${i})"></button>`).join('')}</div>` : '';
+  const html = `<div class="img-row" contenteditable="false" data-index="0"><div class="img-row-track">${slides}</div>${arrows}${dots}</div><p><br></p>`;
   insertHtmlInEditor(html);
   closeImageLayoutModal();
+}
+
+// ── DIAPORAMA IMG-ROW : transition "Push" (une image pousse l'autre) ──
+function imgRowSetIndex(root, index) {
+  const track = root.querySelector('.img-row-track');
+  const slides = root.querySelectorAll('.img-row-cell');
+  const max = slides.length - 1;
+  if (max < 0) return;
+  index = Math.max(0, Math.min(max, index));
+  root.dataset.index = index;
+  if (track) track.style.transform = `translateX(-${index * 100}%)`;
+  const prevBtn = root.querySelector('.img-row-arrow.prev');
+  const nextBtn = root.querySelector('.img-row-arrow.next');
+  if (prevBtn) prevBtn.disabled = index === 0;
+  if (nextBtn) nextBtn.disabled = index === max;
+  root.querySelectorAll('.img-row-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+}
+
+function imgRowNav(btn, dir) {
+  const root = btn.closest('.img-row');
+  if (!root) return;
+  const current = parseInt(root.dataset.index || '0', 10);
+  imgRowSetIndex(root, current + dir);
+  imgRowStartAutoplay(root); // relance le compte à rebours après une action manuelle
+}
+
+function imgRowGoTo(btn, index) {
+  const root = btn.closest('.img-row');
+  if (!root) return;
+  imgRowSetIndex(root, index);
+  imgRowStartAutoplay(root); // relance le compte à rebours après une action manuelle
+}
+
+// ── DIAPORAMA IMG-ROW : défilement automatique (10s) ──────────
+function imgRowStartAutoplay(root) {
+  const slides = root.querySelectorAll('.img-row-cell');
+  if (slides.length <= 1) return;
+  clearInterval(root._imgRowTimer);
+  root._imgRowTimer = setInterval(() => {
+    const current = parseInt(root.dataset.index || '0', 10);
+    const max = slides.length - 1;
+    imgRowSetIndex(root, current >= max ? 0 : current + 1);
+  }, 10000);
+}
+
+function imgRowStopAutoplay(root) {
+  clearInterval(root._imgRowTimer);
+  root._imgRowTimer = null;
+}
+
+// À appeler après affichage d'un article : lance l'autoplay de chaque
+// diaporama, en pause au survol et relancé en quittant l'image.
+function initImgRowAutoplay(container) {
+  if (!container) return;
+  container.querySelectorAll('.img-row').forEach(root => {
+    if (root._imgRowAutoplayBound) { imgRowStartAutoplay(root); return; }
+    root._imgRowAutoplayBound = true;
+    root.addEventListener('mouseenter', () => imgRowStopAutoplay(root));
+    root.addEventListener('mouseleave', () => imgRowStartAutoplay(root));
+    imgRowStartAutoplay(root);
+  });
+}
+
+// Force tous les diaporamas d'un conteneur à revenir sur la 1ère image.
+// (évite qu'un diaporama enregistré alors qu'on l'avait fait défiler pendant
+// la rédaction ne s'ouvre plus tard sur une image autre que la première)
+function resetImgRowCarousels(container) {
+  if (!container) return;
+  container.querySelectorAll('.img-row').forEach(root => {
+    imgRowSetIndex(root, 0);
+  });
 }
 
 function insertHtmlInEditor(html) {
@@ -2639,6 +2803,28 @@ function insertHtmlInEditor(html) {
   updateCharCount();
 }
 
+// ── SUGGESTION DE LÉGENDE À PARTIR DU NOM DE FICHIER ──
+// Format attendu : ACTIF_YYYY-MM-DD_HH-MM-SS_xxxx[.ext]
+// Exemple       : EURNZD_2026-06-23_08-13-29_0d6d1.png
+// Résultat      : "Analyse EURNZD Mardi 23 Juin 2026 à 08h13"
+function suggestCaptionFromFilename(filename) {
+  const base = filename.replace(/\.[^.]+$/, ''); // retirer l'extension
+  const m = base.match(/^([A-Z0-9]+)_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-\d{2}_/i);
+  if (!m) return '';
+  const actif  = m[1].toUpperCase();
+  const y  = parseInt(m[2], 10);
+  const mo = parseInt(m[3], 10);
+  const d  = parseInt(m[4], 10);
+  const hh = m[5];
+  const mm = m[6];
+  const FR_DAYS_CAP   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const FR_MONTHS_CAP = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const date = new Date(y, mo - 1, d);
+  const dayName   = FR_DAYS_CAP[date.getDay()];
+  const monthName = FR_MONTHS_CAP[mo - 1];
+  return `Analyse ${actif} ${dayName} ${d} ${monthName} ${y} à ${hh}h${mm}`;
+}
+
 function handleInlineImageChange(e) {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
@@ -2649,11 +2835,22 @@ function handleInlineImageChange(e) {
   reader.onload = ev => {
     const dataUrl = ev.target.result;
 
-    // Cas : upload pour un emplacement spécifique (layout 2/3 colonnes)
+    // Cas : upload pour un emplacement specifique (layout 2-5 colonnes)
     if (activeSlotIndex !== null) {
-      imageSlots[activeSlotIndex].dataUrl = dataUrl;
+      const slotIdx = activeSlotIndex;
+      document.querySelectorAll('.img-slot-caption-input').forEach(inp => {
+        const idx = parseInt(inp.dataset.index);
+        if (!isNaN(idx)) imageSlots[idx].caption = inp.value;
+      });
+      imageSlots[slotIdx].dataUrl = dataUrl;
+      const captionEmpty = !imageSlots[slotIdx].caption;
+      const suggested = captionEmpty ? suggestCaptionFromFilename(file.name) : '';
       activeSlotIndex = null;
       renderImageSlots();
+      if (captionEmpty && suggested) {
+        const inp2 = document.querySelector('.img-slot-caption-input[data-index="' + slotIdx + '"]');
+        if (inp2) { inp2.value = suggested; imageSlots[slotIdx].caption = suggested; }
+      }
       e.target.value = '';
       return;
     }
@@ -2856,6 +3053,7 @@ document.addEventListener('input', e => {
 document.addEventListener('click', e => {
   if (e.target.classList.contains('art-action-btn') || e.target.classList.contains('art-edit-btn') || e.target.classList.contains('art-del-btn')) {
     e.stopPropagation();
+    e.preventDefault();
   }
 });
 
